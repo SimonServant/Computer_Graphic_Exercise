@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": {
+				"owner": "webpack",
+				"severity": "error",
+				"fileLocation": "absolute",
+				"pattern": [
+					{
+						"regexp": "ERROR in (.*)",
+						"file": 1
+					},
+					{
+						"regexp": "\\((\\d+),(\\d+)\\):(.*)",
+						"line": 1,
+						"column": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Compiling\\.\\.\\.$",
+					"endsPattern": "Compiled successfully\\."
+				}
+			},
+			"label": "npm: start",
+			"detail": "start the development server",
+			"promptOnClose": true,
+			"isBackground": true,
+		},
+		{
+			"type": "npm",
+			"script": "start-no-browser",
+			"problemMatcher": {
+				"owner": "webpack",
+				"severity": "error",
+				"fileLocation": "absolute",
+				"pattern": [
+					{
+						"regexp": "ERROR in (.*)",
+						"file": 1
+					},
+					{
+						"regexp": "\\((\\d+),(\\d+)\\):(.*)",
+						"line": 1,
+						"column": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Compiling\\.\\.\\.$",
+					"endsPattern": "Compiled successfully\\."
+				}
+			},
+			"label": "npm: start without browser",
+			"detail": "start the development server without browser",
+			"promptOnClose": true,
+			"isBackground": true,
+		}
+	]
+}

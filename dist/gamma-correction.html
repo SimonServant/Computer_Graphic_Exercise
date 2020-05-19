@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ICG - Colour - Gamma Correction</title>
+    <script type="text/javascript" src="gammacorrection.bundle.js"></script>
+    <link rel="icon" type="image/png" href="hci-logo.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <img src="hci-logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                ICG
+            </a>
+            <div class="navbar-brand">Gamma Correction</div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <figure class="figure mx-auto d-block">
+            <canvas id="gamma" class="figure-img mx-auto d-block rounded" width="800" height="400"></canvas>
+            <figcaption class="figure-caption text-center">
+                <div class="form-group text-left">
+                    <label for="gammaslider">Gamma</label>
+                    <input class="form-control-range" type="range" id="gammaslider" min="1" max="5" step="0.1">
+                </div>
+                Determine the color of each pixel after the gamma correction
+            </figcaption>
+        </figure>
+    </div>
+</body>
+
+</html>

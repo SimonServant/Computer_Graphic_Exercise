@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ICG - Colour - CMYK</title>
+    <script type="text/javascript" src="quantise.bundle.js"></script>
+    <link rel="icon" type="image/png" href="hci-logo.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <img src="hci-logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                ICG
+            </a>
+            <div class="navbar-brand">Quantise</div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise" class="figure-img mx-auto d-block rounded" width="512" height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Original Squirrel<br />
+                    <button class="btn btn-dark" id="original-unique">Check unique</button>
+                </figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise-bw" class="figure-img mx-auto d-block rounded" width="512" height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Create a black and white version by converting the RBG values to XYZ and use the Y value.
+                </figcaption>
+            </figure>
+            <figure class="figure col-sm-6">
+                <img class="figure-img mx-auto d-block rounded" src="quantise-bw-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise-bw-poster" class="figure-img mx-auto d-block rounded" width="512"
+                    height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Quantise the image to 4 values.<br />
+                    <button class="btn btn-dark" id="quantise-bw-unique">Check unique</button>
+                </figcaption>
+            </figure>
+            <figure class="figure col-sm-6">
+                <img class="figure-img mx-auto d-block rounded" src="quantise-bw-poster-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise-colour-poster" class="figure-img mx-auto d-block rounded" width="512"
+                    height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Uniformly quantise the colour image to 4 values per colour channel. <br />
+                    <button class="btn btn-dark" id="quantise-colour-unique">Check unique</button>
+                </figcaption>
+            </figure>
+            <figure class="figure col-sm-6">
+                <img class="figure-img mx-auto d-block rounded" src="quantise-colour-poster-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <svg id="hist-svg" height="384" width="512" viewBox="0 0 1 1">
+                    <polyline id="hist-r" style="stroke:red;stroke-width:0.005;fill:none;" />
+                    <polyline id="hist-g" style="stroke:green;stroke-width:0.005;fill:none;" />
+                    <polyline id="hist-b" style="stroke:blue;stroke-width:0.005;fill:none;" />
+                </svg>
+                <figcaption class="figure-caption text-center">
+                    Histogram
+                </figcaption>
+            </figure>
+            <figure class="figure col-sm-6">
+                <img class="figure-img mx-auto d-block rounded" src="quantise-hist-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise-colour-adaptive" class="figure-img mx-auto d-block rounded" width="512"
+                    height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Quantise the colour image to 4 values per colour channel by having the same amount of intensity
+                    samples per interval. <br />
+                    <button class="btn btn-dark" id="quantise-adaptive-unique">Check unique</button>
+                </figcaption>
+            </figure>
+            <figure class="figure col-sm-6">
+                <img class="figure-img mx-auto d-block rounded" src="quantise-colour-adaptive-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="quantise-kd" class="figure-img mx-auto d-block rounded" width="512" height="384"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Quantise the colour image by dividing the colour space with a kd
+                    tree of depth 6.<br />
+                    <button class="btn btn-dark" id="quantise-kd-unique">Check unique</button>
+                </figcaption>
+            </figure>
+            <div id="carouselKd" class="carousel slide col-sm-6" data-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <figure>
+                            <img class="img-fluid mx-auto d-block rounded" src="quantise-kd-finished.png">
+                            <figcaption class="figure-caption text-center">Reference image</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-item">
+                        <figure>
+                            <img class="img-fluid mx-auto d-block rounded" src="quantise.jpg" width="512" height="384">
+                            <figcaption class="figure-caption text-center">Original</figcaption>
+                        </figure>
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselKd" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselKd" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
