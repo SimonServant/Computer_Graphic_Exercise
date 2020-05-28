@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ICG - 2D - Bresenham</title>
+    <script type="text/javascript" src="bresenham.bundle.js"></script>
+    <link rel="icon" type="image/png" href="hci-logo.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <img src="hci-logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                ICG
+            </a>
+            <div class="navbar-brand">Bresenham</div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="bresenham" class="figure-img mx-auto d-block rounded" width="300" height="300"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Implement the Bresenham algorithm to create a rotating line
+                </figcaption>
+            </figure>
+            <figure class="col-sm-6 figure">
+                <canvas id="example" class="figure-img mx-auto d-block rounded" width="300" height="300"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Reference image. The reference uses the build-in line drawing functionality
+                    and is smoothed. Your line will look a bit more jagged.
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+</body>
+
+</html>
