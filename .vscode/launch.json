@@ -5,12 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Firefox with Server",
-            "type": "firefox",
+            "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: start without browser",
+            "name": "Launch Chrome against localhost",
             "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}/dist"
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

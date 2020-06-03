@@ -9,55 +9,45 @@
  */
 export function bresenham(data: Uint8ClampedArray, pointA: [number, number], pointB: [number, number], width: number, height: number) {
     const realWidth = width * 4;
-    var p1x = Math.round(pointA[0]);
-    var p1y = Math.round(pointA[1]);
-    var p2x = Math.round(pointB[0]);
-    var p2y = Math.round(pointB[1]);
+    var p1x = pointA[0];
+    var p1y = pointA[1];
+    var p2x = pointB[0];
+    var p2y = pointB[1];
 
     // Calculate line deltas
-    var dx = (p2x - p1x);
-    var dy = (p2y - p1y);
+    var dx = Math.abs(p2x - p1x);
+    var dy = Math.abs(p2y - p1y);
+    
+    var sx = p1x < p2x ? 1 : -1;
+    var sy = p1y < p2y ? 1 : -1; 
 
-    var x = p1x;
-    var y = p1y;
+    var err = (dx > dy ? dx : -dy) / 2;
+    var error_previous;
 
-    //this is the case when slope(m) < 1
-    if (Math.abs(dx) > Math.abs(dy))
-    {
-        setPixel(x, y, data, realWidth);
-        var pk = (2 * Math.abs(dy)) - Math.abs(dx)
+    var counter = 300;
 
-        for (let index = 0; index < Math.abs(dx); index++) 
-        {
-            x = x + 1;
-            if(pk < 0)
-                pk = pk + (2 * Math.abs(dy));
-            else
-            {
-                y = y + 1;
-                pk = pk + (2 * Math.abs(dy)) - (2 * Math.abs(dx));
-            }
-            setPixel(x, y, data, realWidth);            
+    for(;;){
+        setPixel(p1x, p1y, data, realWidth);
+        if(p1x == p2x && p1y == p2y) {
+            break;
         }
-
+        error_previous = err;
+        if(error_previous > -dx){
+            err -= dy;
+            p1x += sx;
+        }
+        if(error_previous < dy) {
+            err += dx;
+            p1y += sy;
+        }
+        counter --;
+        if (counter === 0){
+            var hansimGlück = 0;
+            //break;
+        }
     }
-    // else
-    // {
-    //     setPixel(x, y, data, realWidth);
-    //     var pk = (2 * Math.abs(dx)) - Math.abs(dy)
 
-    //     for (let index = 0; index < Math.abs(dy); index++) {
-    //         y = y + 1;
-    //         if(pk < 0)
-    //             pk = pk + (2 * Math.abs(dx));
-    //         else
-    //         {
-    //             x = x + 1;
-    //             pk = pk + (2 * Math.abs(dx)) - (2 * Math.abs(dy));
-    //         }
-    //         setPixel(x, y, data, realWidth);            
-    //     }
-    // }
+    var test = 1;
 
 }
 
