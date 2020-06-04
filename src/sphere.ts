@@ -24,6 +24,26 @@ export default class Sphere {
    * @return The intersection if there is one, null if there is none
    */
   intersect(ray: Ray): Intersection | null {
-    // TODO [exercise 5/6]
+    this.center;
+    // Von allen anderen Vektoren Center abziehen um Center zum Mittelpunkt zu machen und Forml anzeigen zu können
+    var new_ray_origin = ray.origin.sub(this.center);
+    var discriminant  = Math.pow(new_ray_origin.dot(ray.direction), 2) - new_ray_origin.dot(new_ray_origin) + this.radius* this.radius;
+    if(discriminant > 0 ){
+      var t1 = -new_ray_origin.dot(ray.direction) + Math.sqrt(discriminant);
+      var t2 = -new_ray_origin.dot(ray.direction) - Math.sqrt(discriminant);
+      // Check wich intersection is closer
+      var result  = t1 < t2 ?  t1 : t2 ;
+      var intersectionPoint = ray.origin.add(ray.direction.mul(result));
+      return new Intersection(result, intersectionPoint, ray.direction);
+    }
+    else if(discriminant === 0 ){
+      var t1 = -new_ray_origin.dot(ray.direction) + Math.sqrt(discriminant);
+      var result = t1;
+      var intersectionPoint = ray.origin.add(ray.direction.mul(result));
+      return new Intersection(result, intersectionPoint, ray.direction); 
+    }
+    else{
+      return null;
+    }
   }
 }
