@@ -15,10 +15,7 @@ export default class Vector {
    * @param w The w component
    */
   constructor(x: number, y: number, z: number, w: number) {
-    this.data[0] = x;
-    this.data[1] = y;
-    this.data[2] = z;
-    this.data[3] = w;
+    this.data = [x, y, z, w];
   }
 
   /**
