@@ -7,9 +7,20 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
+            "name": "Launch Chrome",
+            "url": "http://localhost:8080/",
+            "webRoot": "${workspaceFolder}/dist",
+            "preLaunchTask": "npm: start without browser",
+            "sourceMaps": true,
+            "disableNetworkCache": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./": "${webRoot}/../",
+                "webpack:///src/": "${webRoot}/../src/",
+                "webpack:///": "${webRoot}/../",
+                "webpack:///./~/": "${webRoot}/../node_modules/",
+                "meteor://:computer:app/": "${webRoot}/../"
+            }
+    
         }
     ]
 }
