@@ -21,6 +21,12 @@ export default class Ray {
   static makeRay(xpos: number, ypos: number,
     camera: { origin: Vector, width: number, height: number, alpha: number }
   ): Ray {
-    // TODO
+    
+    var x_d = xpos - (camera.width-1)/2;
+    var y_d = (camera.height-1)/2 - ypos;
+    var z_d = -(camera.width/2) / Math.tan(camera.alpha/2);
+    var origin = new Vector(xpos,ypos, 0 , 0 );
+    var direction = new Vector(x_d, y_d, z_d, 0).normalised();
+    return new Ray(origin, direction);
   }
 }
