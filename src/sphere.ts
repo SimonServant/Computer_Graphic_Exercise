@@ -34,13 +34,16 @@ export default class Sphere {
       // Check wich intersection is closer
       var result  = t1 < t2 ?  t1 : t2 ;
       var intersectionPoint = ray.origin.add(ray.direction.mul(result));
-      return new Intersection(result, intersectionPoint, ray.direction);
+      var normal = intersectionPoint.sub(this.center);
+      return new Intersection(result, intersectionPoint, normal.normalised());
     }
     else if(discriminant === 0 ){
       var t1 = -new_ray_origin.dot(ray.direction) + Math.sqrt(discriminant);
       var result = t1;
       var intersectionPoint = ray.origin.add(ray.direction.mul(result));
-      return new Intersection(result, intersectionPoint, ray.direction); 
+      // The normal of the intersectionPoint is the Vektor from Center of the orb to the intersection Point C => IP == IP - C. Taking the ray normal does not make sense, since the ray is not used anymore
+      var normal  = intersectionPoint.sub(this.center);
+      return new Intersection(result, intersectionPoint, normal.normalised()); 
     }
     else{
       return null;
