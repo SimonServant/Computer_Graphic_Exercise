@@ -42,7 +42,7 @@ export default class Sphere {
       var result = t1;
       var intersectionPoint = ray.origin.add(ray.direction.mul(result));
       // The normal of the intersectionPoint is the Vektor from Center of the orb to the intersection Point C => IP == IP - C. Taking the ray normal does not make sense, since the ray is not used anymore
-      var normal  = intersectionPoint.sub(this.center);
+      var normal  = intersectionPoint.sub(this.center); //(Oberflächennormale deutet rechtwinkelig von der Fläche weg)
       return new Intersection(result, intersectionPoint, normal.normalised()); 
     }
     else{
