@@ -34,12 +34,12 @@ export default function phong(
   // // r == s gespiegelt an n => r=d−2(d⋅n)n // r = 
   // var r =  s.sub(intersection.normal.mul(s.dot(intersection.normal)).mul(2));
 
-  var r = intersection.normal.mul(s.dot(intersection.normal)).mul(2).sub(s)
+  var r = intersection.normal.mul(s.dot(intersection.normal)).mul(2).sub(s);
   // Last vektor is V towards the eye therefore =>
   var v = cameraPosition.sub(intersection.point).normalised();
 
   // Ambient Lighting: Lr  =  ka L^a | Right now missing Lr Reflected ambient engery and La fictitious ambient light energy
-  var Lr = lightColor.mul(kA);
+  var Lr = color.mul(kA);
 
   // Diffuse Lighting: Ld(ps= Lj max(0, n.dot(s) => Missing Lj = Li(p,wi))
   var Ld = lightColor.mul(Math.max(0,intersection.normal.dot(s))).mul(kD);
@@ -49,7 +49,7 @@ export default function phong(
 
   // Tipps implementierung: Normalisierung aller vektoren, Lichtquelle nicht verwenden wenn hinter Surface => n dot s kleiner gleich 0 dann ist Lj auch null
 
-  // TODO [exercise 6]
-  // var color = Lr.add(Ld).add(Ls);
+  color =  Lr.add(Ld).add(Ls);
+  color.a = 1;
   return color;
 }
