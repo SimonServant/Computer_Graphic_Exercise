@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ICG - Raytracing - Phong</title>
+    <script type="text/javascript" src="phong.bundle.js"></script>
+    <link rel="icon" type="image/png" href="hci-logo.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <img src="hci-logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+                ICG
+            </a>
+            <div class="navbar-brand">Phong</div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="row">
+            <figure class="figure col-sm-6">
+                <canvas id="raytracer" class="figure-img mx-auto d-block rounded" width="500" height="500"></canvas>
+                <figcaption class="figure-caption text-center">
+                    Implement a Raytracer that uses the Phong Lighting model.
+                    <div class="form-group text-left">
+                        <label for="shininess">Shininess</label>
+                        <input class="form-control-range" id="shininess" type="range" min="1" max="50">
+                    </div>
+                </figcaption>
+            </figure>
+            <figure class="col-sm-6 figure">
+                <img class="figure-img mx-auto d-block rounded" src="phong-finished.png">
+                <figcaption class="figure-caption text-center">Reference image</figcaption>
+            </figure>
+        </div>
+    </div>
+</body>
+
+</html>
