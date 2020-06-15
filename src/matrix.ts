@@ -50,6 +50,13 @@ export default class Matrix {
    */
   static translation(translation: Vector): Matrix {
     // TODO exercise 7
+    var translationMatrix = Matrix.identity();
+
+    translationMatrix.setVal(0, 3, translation.x)
+    translationMatrix.setVal(1, 3, translation.y)
+    translationMatrix.setVal(2, 3, translation.z)
+
+    return translationMatrix;
   }
 
   /**
@@ -60,7 +67,32 @@ export default class Matrix {
    */
   static rotation(axis: Vector, angle: number): Matrix {
     // TODO exercise 7
-  }
+    var refactorMatrix = Matrix.identity();
+
+    if (axis.x == 1){
+
+      refactorMatrix.setVal(1, 1, Math.cos(angle));
+      refactorMatrix.setVal(1, 2, -Math.sin(angle));
+      refactorMatrix.setVal(2, 1, Math.sin(angle));
+      refactorMatrix.setVal(2, 2, Math.cos(angle));
+
+    } else if (axis.y == 1){
+
+      refactorMatrix.setVal(0, 0, Math.cos(angle));
+      refactorMatrix.setVal(0, 2, Math.sin(angle));
+      refactorMatrix.setVal(2, 0, -Math.sin(angle));
+      refactorMatrix.setVal(2, 2, Math.cos(angle));
+
+    } else if (axis.z == 1){
+
+      refactorMatrix.setVal(0, 0, Math.cos(angle));
+      refactorMatrix.setVal(0, 1, -Math.sin(angle));
+      refactorMatrix.setVal(1, 0, Math.sin(angle));
+      refactorMatrix.setVal(1, 1, Math.cos(angle));
+
+    } 
+    return refactorMatrix;
+    }
 
   /**
    * Returns a matrix that represents a scaling
@@ -69,6 +101,13 @@ export default class Matrix {
    */
   static scaling(scale: Vector): Matrix {
     // TODO exercise 7
+    var scalingMatrix = Matrix.identity();
+
+    scalingMatrix.setVal(0, 0, scale.x)
+    scalingMatrix.setVal(1, 1, scale.y)
+    scalingMatrix.setVal(2, 2, scale.z)
+  
+    return scalingMatrix;
   }
 
   /**
@@ -80,6 +119,7 @@ export default class Matrix {
    */
   static lookat(eye: Vector, center: Vector, up: Vector): Matrix {
     // TODO exercise 10
+    return Matrix.identity();
   }
 
   /**
@@ -94,6 +134,7 @@ export default class Matrix {
    */
   static frustum(left: number, right: number, bottom: number, top: number, near: number, far: number): Matrix {
     // TODO exercise 11
+    return Matrix.identity();
   }
 
   /**
@@ -106,6 +147,7 @@ export default class Matrix {
    */
   static perspective(fovy: number, aspect: number, near: number, far: number): Matrix {
     // TODO exercise 11
+    return Matrix.identity();
   }
 
   /**
@@ -131,8 +173,32 @@ export default class Matrix {
   mul(other: Matrix | Vector): Matrix | Vector {
     if (other instanceof Matrix) {
       // TODO exercise 7
+      console.log("Matrix-Matrix multiplication");
+
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          var result = 0;
+          for (let num = 0; num < 4; num++){
+            result += this.data[row * 4 + num] * other.data[num * 4 + col];
+          }
+          this.setVal(row, col, result);
+        }
+      }
+      return this
     } else { // other is vector
       // TODO exercise 7
+      console.log("Matrix-Vector multiplication");
+
+      var resultVec = new Vector(0, 0, 0, 0);
+
+      for (let row = 0; row < 4; row++) {
+        var result = 0;
+        for (let num = 0; num < 4; num++){
+          result += this.data[row * 4 + num] * other.data[num];
+        }
+        resultVec.data[row] = result;  
+      }
+      return resultVec;
     }
   }
 
@@ -142,6 +208,18 @@ export default class Matrix {
    */
   transpose(): Matrix {
     // TODO exercise 7
+    var array = new Array(16);
+    for (let num = 0; num < 16; num++){
+      array[num] = 0;
+    }
+    var resultMatrix = new Matrix(array);
+
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        resultMatrix.data[row * 4 + col] = this.data[col * 4 + row];
+      }
+    }
+    return resultMatrix;
   }
 
   /**

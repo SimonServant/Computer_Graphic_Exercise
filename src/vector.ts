@@ -270,4 +270,17 @@ export default class Vector {
     var length = Math.sqrt(firstValue + secondValue + thirdValue + fourthValue);
     return length;
   }
+
+  /**
+   * Debug print to console
+   */
+  print() {
+    for (let row = 0; row < 4; row++) {
+      console.log("> " + this.x +
+        "\t" + this.y +
+        "\t" + this.z +
+        "\t" + this.w 
+      );
+    }
+  }
 }
