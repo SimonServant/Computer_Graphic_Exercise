@@ -133,7 +133,7 @@ export default class RayVisitor implements Visitor {
     let mat = Matrix.identity();
     
     this.matrixStack.forEach(nod =>
-        mat.mul(nod.matrix)
+        mat = mat.mul(nod.matrix)
       );
     this.objects.push(new Sphere(
       mat.mul(new Vector(0, 0, 0, 1)),
@@ -148,7 +148,7 @@ export default class RayVisitor implements Visitor {
   visitAABoxNode(node: AABoxNode) {
     let mat = Matrix.identity();
     this.matrixStack.forEach(nod =>
-      mat.mul(nod.matrix)
+      mat = mat.mul(nod.matrix)
     );
     this.objects.push(new AABox(
       mat.mul(new Vector(-0.5, -0.5, -0.5, 1)),
