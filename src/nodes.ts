@@ -20,15 +20,14 @@ export class Node {
  * @extends Node
  */
 export class GroupNode extends Node {
-  // TODO declare instance variables [exercise 8]
-
+  private children:Array<Node> = new Array<Node>();
   /**
    * Constructor
    * @param mat A matrix describing the node's transformation
    */
   constructor(public matrix: Matrix) {
     super();
-    // TODO [exercise 8]
+    this.matrix = matrix;
   }
 
   /**
@@ -36,7 +35,7 @@ export class GroupNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    // TODO [exercise 8]
+    visitor.visitGroupNode(this);
   }
 
   /**
@@ -44,7 +43,7 @@ export class GroupNode extends Node {
    * @param childNode The child node to add
    */
   add(childNode: Node) {
-    // TODO [exercise 8]
+    this.children.push(childNode);
   }
 }
 
@@ -71,7 +70,7 @@ export class SphereNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    // TODO [exercise 8]
+    visitor.visitSphereNode(this);
   }
 }
 
@@ -96,7 +95,7 @@ export class AABoxNode extends Node {
    * @param  {Visitor} visitor - The visitor
    */
   accept(visitor: Visitor) {
-    // TODO [exercise 8]
+    visitor.visitAABoxNode(this);
   }
 }
 
@@ -120,6 +119,6 @@ export class TextureBoxNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    // TODO [exercise 8]
+    visitor.visitTextureBoxNode(this);
   }
 }
