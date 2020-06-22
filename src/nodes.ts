@@ -20,7 +20,7 @@ export class Node {
  * @extends Node
  */
 export class GroupNode extends Node {
-  private children:Array<Node> = new Array<Node>();
+  public children:Array<Node> = new Array<Node>();
   /**
    * Constructor
    * @param mat A matrix describing the node's transformation

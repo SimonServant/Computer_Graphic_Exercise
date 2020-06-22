@@ -35,6 +35,7 @@ export default class RayVisitor implements Visitor {
    */
   objects: Array<Intersectable>;
 
+  matrixStack: Array<GroupNode>;
   // TODO declare instance variables here [exercise 8]
 
   /**
@@ -49,7 +50,7 @@ export default class RayVisitor implements Visitor {
     height: number
   ) {
     this.imageData = context.getImageData(0, 0, width, height);
-    // TODO setup [exercise 8]
+    this.matrixStack = [];
   }
 
   /**
@@ -111,7 +112,10 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNode(node: GroupNode) {
-    // TODO traverse the graph and build the model matrix [exercise 8]
+    this.matrixStack.push(node);
+    node.children.forEach(child => {
+      child.accept(this);
+    });
   }
 
   /**
@@ -120,7 +124,10 @@ export default class RayVisitor implements Visitor {
    */
   visitSphereNode(node: SphereNode) {
     let mat = Matrix.identity();
-    // TODO use the model matrix [exercise 8]
+    
+    this.matrixStack.forEach(nod =>
+        mat.mul(nod.matrix)
+      );
     this.objects.push(new Sphere(
       mat.mul(new Vector(0, 0, 0, 1)),
       mat.mul((new Vector(1, 1, 1, 0)).normalised()).length,
