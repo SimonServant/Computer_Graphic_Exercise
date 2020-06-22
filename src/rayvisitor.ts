@@ -116,6 +116,13 @@ export default class RayVisitor implements Visitor {
     node.children.forEach(child => {
       child.accept(this);
     });
+
+    var test = this.matrixStack.pop();
+    if(test != node){
+      console.log("Notify me");
+    }
+
+    // Remove the group node after traversal
   }
 
   /**
@@ -140,7 +147,9 @@ export default class RayVisitor implements Visitor {
    */
   visitAABoxNode(node: AABoxNode) {
     let mat = Matrix.identity();
-    // TODO use the model matrix [exercise 8]
+    this.matrixStack.forEach(nod =>
+      mat.mul(nod.matrix)
+    );
     this.objects.push(new AABox(
       mat.mul(new Vector(-0.5, -0.5, -0.5, 1)),
       mat.mul(new Vector(0.5, 0.5, 0.5, 1)),
