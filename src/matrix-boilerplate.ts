@@ -38,22 +38,6 @@ window.addEventListener('load', () => {
     let translation = Matrix.identity();
     let scale = Matrix.identity();
 
-    console.log("rotation: ")
-    rotation.print();
-    
-    console.log("translation: ")
-    translation.print();
-    
-    console.log("scale: ")
-    scale.print();
-
-    console.log("matrixmultiplication: ")
-    var matrixmultiplication = rotation.mul(scale);
-    console.log("matrixmultiplication result: ")
-    matrixmultiplication.print();
-    
-    var test = 0;
-
     function animate() {
         data.fill(0);
         let manipulatedObjects = [];

@@ -50,13 +50,12 @@ export default class Matrix {
    */
   static translation(translation: Vector): Matrix {
     // TODO exercise 7
-    var translationMatrix = Matrix.identity();
-
-    translationMatrix.setVal(0, 3, translation.x)
-    translationMatrix.setVal(1, 3, translation.y)
-    translationMatrix.setVal(2, 3, translation.z)
-
-    return translationMatrix;
+    return new Matrix([
+      1, 0, 0, translation.x,
+      0, 1, 0, translation.y,
+      0, 0, 1, translation.z,
+      0, 0, 0, 1
+    ]);
   }
 
   /**
@@ -101,13 +100,12 @@ export default class Matrix {
    */
   static scaling(scale: Vector): Matrix {
     // TODO exercise 7
-    var scalingMatrix = Matrix.identity();
-
-    scalingMatrix.setVal(0, 0, scale.x)
-    scalingMatrix.setVal(1, 1, scale.y)
-    scalingMatrix.setVal(2, 2, scale.z)
-  
-    return scalingMatrix;
+    return new Matrix([
+      scale.x, 0, 0, 0,
+      0, scale.y, 0, 0,
+      0, 0, scale.z, 0,
+      0, 0, 0, 1
+    ]);
   }
 
   /**
@@ -174,17 +172,18 @@ export default class Matrix {
     if (other instanceof Matrix) {
       // TODO exercise 7
       console.log("Matrix-Matrix multiplication");
+      let resultMatrix = Matrix.identity();
 
       for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 4; col++) {
           var result = 0;
           for (let num = 0; num < 4; num++){
-            result += this.data[row * 4 + num] * other.data[num * 4 + col];
+            result += this.getVal(row, num) * other.getVal(num, col);
           }
-          this.setVal(row, col, result);
+          resultMatrix.setVal(row, col, result);
         }
       }
-      return this
+      return resultMatrix;
     } else { // other is vector
       // TODO exercise 7
       console.log("Matrix-Vector multiplication");
@@ -194,7 +193,7 @@ export default class Matrix {
       for (let row = 0; row < 4; row++) {
         var result = 0;
         for (let num = 0; num < 4; num++){
-          result += this.data[row * 4 + num] * other.data[num];
+          result += this.getVal(row, num) * other.data[num];
         }
         resultVec.data[row] = result;  
       }
@@ -208,15 +207,11 @@ export default class Matrix {
    */
   transpose(): Matrix {
     // TODO exercise 7
-    var array = new Array(16);
-    for (let num = 0; num < 16; num++){
-      array[num] = 0;
-    }
-    var resultMatrix = new Matrix(array);
+    var resultMatrix = Matrix.identity();
 
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 4; col++) {
-        resultMatrix.data[row * 4 + col] = this.data[col * 4 + row];
+        resultMatrix.setVal(row, col, this.getVal(col, row));
       }
     }
     return resultMatrix;
