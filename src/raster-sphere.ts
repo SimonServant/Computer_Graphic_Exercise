@@ -17,7 +17,10 @@ export default class RasterSphere {
      * The normals on the surface at each vertex location
      */
     normalBuffer: WebGLBuffer;
+
     // TODO private variable for color buffer [exercise 9]
+    colorBuffer: WebGLBuffer;
+
     /**
      * The amount of indices
      */
@@ -93,11 +96,28 @@ export default class RasterSphere {
         this.indexBuffer = indexBuffer;
         const normalBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, normalBuffer);
+        var color_ = color;
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(normals), this.gl.STATIC_DRAW);
         this.normalBuffer = normalBuffer;
         this.elements = indices.length;
 
         // TODO create colorBuffer [exercise 9]
+        // Anlegen des Buffer 
+        const colorBuffer = this.gl.createBuffer();
+        // Spezifikation des Buffertyps als Vertex / Index Buffer
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
+        // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        // Initialiserung des Buffers mit Daten (Vertex Positionen)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER,       
+            new Float32Array(
+            [ color.r, color.g, color.b, 1,
+              color.r, color.g, color.b, 1,
+              color.r, color.g, color.b, 1,
+              color.r, color.g, color.b, 1,
+              color.r, color.g, color.b, 1,
+              color.r, color.g, color.b, 1]), 
+              this.gl.STATIC_DRAW);
+        this.colorBuffer = colorBuffer;
     }
 
     /**
@@ -109,13 +129,22 @@ export default class RasterSphere {
         const positionLocation = shader.getAttributeLocation("a_position");
         this.gl.enableVertexAttribArray(positionLocation);
         this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
+        
+        var colorLocation = shader.getAttributeLocation("a_color");
+        this.gl.enableVertexAttribArray(colorLocation);
+        this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
+
         // TODO bind colour buffer [exercise 9]
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        
+
         // TODO bind normal buffer [exercise 10]
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.elements, this.gl.UNSIGNED_SHORT, 0);
 
         this.gl.disableVertexAttribArray(positionLocation);
         // TODO disable color vertex attrib array [exercise 9]
+        this.gl.disableVertexAttribArray(colorLocation);
         // TODO disable normal vertex attrib array [exercise 10]
     }
 }
