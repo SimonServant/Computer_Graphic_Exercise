@@ -43,6 +43,7 @@ export default class RasterSphere {
         let vertices = [];
         let indices = [];
         let normals = [];
+        let colors = [];
 
         let ringsize = 30;
         for (let ring = 0; ring < ringsize; ring++) {
@@ -86,6 +87,12 @@ export default class RasterSphere {
             }
         }
 
+        do {
+            colors.push(color.r);
+            colors.push(color.g);
+            colors.push(color.b);
+        } while (colors.length!= vertices.length)
+
         const vertexBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
@@ -108,15 +115,8 @@ export default class RasterSphere {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
         // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         // Initialiserung des Buffers mit Daten (Vertex Positionen)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER,       
-            new Float32Array(
-            [ color.r, color.g, color.b, 1,
-              color.r, color.g, color.b, 1,
-              color.r, color.g, color.b, 1,
-              color.r, color.g, color.b, 1,
-              color.r, color.g, color.b, 1,
-              color.r, color.g, color.b, 1]), 
-              this.gl.STATIC_DRAW);
+        //TODO FIll colorbuffer to fit vertexbuffer
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
         this.colorBuffer = colorBuffer;
     }
 
@@ -130,12 +130,12 @@ export default class RasterSphere {
         this.gl.enableVertexAttribArray(positionLocation);
         this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
         
-        var colorLocation = shader.getAttributeLocation("a_color");
-        this.gl.enableVertexAttribArray(colorLocation);
-        this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
 
         // TODO bind colour buffer [exercise 9]
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        var colorLocation = shader.getAttributeLocation("a_color");
+        this.gl.enableVertexAttribArray(colorLocation);
+        this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
         
 
         // TODO bind normal buffer [exercise 10]

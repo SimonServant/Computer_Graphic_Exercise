@@ -1,9 +1,9 @@
 attribute vec3 a_position;
-attribute vec4 a_color;
+attribute vec3 a_color;
 // TODO [exercise 9]
 uniform mat4 M;
 
-varying vec4 v_color;
+varying vec3 v_color;
 
 void main() {
   gl_Position = M*vec4(a_position, 1);

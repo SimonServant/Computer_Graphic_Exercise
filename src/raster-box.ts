@@ -66,6 +66,18 @@ export default class RasterBox {
             // bottom
             5, 4, 1, 1, 0, 5
         ];
+
+        let colors = [
+            // Fill with 8 Values for Every vertex
+            0.0, 0.0, 0.0,
+            1, 1, 1,
+            1, 1, 0,
+            0, 1, 1,
+            1, 1, 0,
+            1, 1, 1,
+            1, 0, 0,
+            0, 1, 1,
+        ]
         const vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -83,7 +95,8 @@ export default class RasterBox {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
         // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         // Initialiserung des Buffers mit Daten (Vertex Positionen)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        // Create color array yourself to fit vertices
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
         this.colorBuffer = colorBuffer;
     }
 
@@ -98,11 +111,12 @@ export default class RasterBox {
         this.gl.vertexAttribPointer(positionLocation,
             3, this.gl.FLOAT, false, 0, 0);
 
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
         var colorLocation = shader.getAttributeLocation("a_color");
         this.gl.enableVertexAttribArray(colorLocation);
         this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
         // TODO bind colour buffer [exercise 9]
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.elements, this.gl.UNSIGNED_SHORT, 0);

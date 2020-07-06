@@ -31,7 +31,7 @@ interface Renderable {
  */
 export class RasterVisitor implements Visitor {
   // TODO declare instance variables here
-  matrixStack: Array<GroupNode>;
+  matrixStack: Array<Matrix>;
 
   /**
    * Creates a new RasterVisitor
@@ -109,15 +109,19 @@ export class RasterVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO
-    this.matrixStack.push(node);
+    if(this.matrixStack.length==0){
+      this.matrixStack.push(node.matrix)
+    }
+    else{
+      var peek = this.matrixStack[this.matrixStack.length-1]
+      var currentTransformation  = peek.mul(node.matrix)
+      this.matrixStack.push(currentTransformation)
+    }
     node.children.forEach(child => {
       child.accept(this);
     });
 
     var test = this.matrixStack.pop();
-    if(test != node){
-      console.log("Notify me");
-    }
 
   }
 
@@ -129,9 +133,7 @@ export class RasterVisitor implements Visitor {
     const shader = this.shader;
     shader.use();
     let mat = Matrix.identity();
-    this.matrixStack.forEach(nod =>
-      mat = mat.mul(nod.matrix)
-    );
+    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
     // TODO [exercise 9] Calculate the model matrix for the sphere
     shader.getUniformMatrix("M").set(mat);
 
@@ -156,9 +158,7 @@ export class RasterVisitor implements Visitor {
     let shader = this.shader;
     let mat = Matrix.identity();
     // TODO  [exercise 9] Calculate the model matrix for the sphere
-    this.matrixStack.forEach(nod =>
-      mat = mat.mul(nod.matrix)
-    );
+    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
     shader.getUniformMatrix("M").set(mat);
     let V = shader.getUniformMatrix("V");
     if (V && this.lookat) {
@@ -182,9 +182,7 @@ export class RasterVisitor implements Visitor {
 
     let mat = Matrix.identity();
     // TODO [exercise 9] calculate the model matrix for the box
-    this.matrixStack.forEach(nod =>
-      mat = mat.mul(nod.matrix)
-    );
+    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
     shader.getUniformMatrix("M").set(mat);
     let P = shader.getUniformMatrix("P");
     if (P && this.perspective) {

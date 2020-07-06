@@ -35,7 +35,7 @@ export default class RayVisitor implements Visitor {
    */
   objects: Array<Intersectable>;
 
-  matrixStack: Array<GroupNode>;
+  matrixStack: Array<Matrix>;
   // TODO declare instance variables here [exercise 8]
 
   /**
@@ -112,15 +112,19 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNode(node: GroupNode) {
-    this.matrixStack.push(node);
+    if(this.matrixStack.length==0){
+      this.matrixStack.push(node.matrix)
+    }
+    else{
+      var peek = this.matrixStack[this.matrixStack.length-1]
+      var currentTransformation  = peek.mul(node.matrix)
+      this.matrixStack.push(currentTransformation)
+    }
     node.children.forEach(child => {
       child.accept(this);
     });
 
     var test = this.matrixStack.pop();
-    if(test != node){
-      console.log("Notify me");
-    }
 
     // Remove the group node after traversal
   }
@@ -132,9 +136,7 @@ export default class RayVisitor implements Visitor {
   visitSphereNode(node: SphereNode) {
     let mat = Matrix.identity();
     
-    this.matrixStack.forEach(nod =>
-        mat = mat.mul(nod.matrix)
-      );
+    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
     this.objects.push(new Sphere(
       mat.mul(new Vector(0, 0, 0, 1)),
       mat.mul((new Vector(1, 1, 1, 0)).normalised()).length,
@@ -147,9 +149,7 @@ export default class RayVisitor implements Visitor {
    */
   visitAABoxNode(node: AABoxNode) {
     let mat = Matrix.identity();
-    this.matrixStack.forEach(nod =>
-      mat = mat.mul(nod.matrix)
-    );
+    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
     this.objects.push(new AABox(
       mat.mul(new Vector(-0.5, -0.5, -0.5, 1)),
       mat.mul(new Vector(0.5, 0.5, 0.5, 1)),
