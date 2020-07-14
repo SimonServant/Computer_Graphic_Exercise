@@ -145,7 +145,8 @@ export class RasterVisitor implements Visitor {
     if (P && this.perspective) {
       P.set(this.perspective);
     }
-    // TODO [exercise 10] set the normal matrix
+    
+    const N =  this.lookat.invert().transpose() ;
     this.renderables.get(node).render(shader);
   }
 

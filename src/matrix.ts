@@ -117,7 +117,17 @@ export default class Matrix {
    */
   static lookat(eye: Vector, center: Vector, up: Vector): Matrix {
     // TODO exercise 10
-    return Matrix.identity();
+    let f = new Vector(center.x- eye.x, center.y - eye.y, center.z -eye.z, 0).normalised();
+    let Up = up.normalised();
+    let s = f.cross(Up);
+    let u  = s.normalised().cross(f);
+
+    return new Matrix([
+      s.x, s.y, s.z, 0,
+      u.x, u.y, u.z, 0,
+      -f.x, -f.y, -f.z, 0,
+      0, 0, 0, 1
+    ]);
   }
 
   /**
