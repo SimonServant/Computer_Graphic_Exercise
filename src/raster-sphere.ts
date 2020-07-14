@@ -103,7 +103,6 @@ export default class RasterSphere {
         this.indexBuffer = indexBuffer;
         const normalBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, normalBuffer);
-        var color_ = color;
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(normals), this.gl.STATIC_DRAW);
         this.normalBuffer = normalBuffer;
         this.elements = indices.length;
@@ -139,6 +138,14 @@ export default class RasterSphere {
         
 
         // TODO bind normal buffer [exercise 10]
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer);
+        var normalLocation = shader.getAttributeLocation("a_normal");
+        this.gl.enableVertexAttribArray(normalLocation);
+        this.gl.vertexAttribPointer(normalLocation, 3, this.gl.FLOAT, false, 0, 0);
+
+
+
+
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.elements, this.gl.UNSIGNED_SHORT, 0);
 
@@ -146,5 +153,6 @@ export default class RasterSphere {
         // TODO disable color vertex attrib array [exercise 9]
         this.gl.disableVertexAttribArray(colorLocation);
         // TODO disable normal vertex attrib array [exercise 10]
+        this.gl.disableVertexAttribArray(normalLocation);
     }
 }

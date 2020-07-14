@@ -146,7 +146,12 @@ export class RasterVisitor implements Visitor {
       P.set(this.perspective);
     }
     
-    const N =  this.lookat.invert().transpose() ;
+    const n =  this.lookat.invert().transpose();
+    const N = shader.getUniformMatrix("N");
+    if (N && n) {
+      N.set(n);
+    }
+
     this.renderables.get(node).render(shader);
   }
 
@@ -170,6 +175,12 @@ export class RasterVisitor implements Visitor {
       P.set(this.perspective);
     }
 
+    const n =  this.lookat.invert().transpose();
+    const N = shader.getUniformMatrix("N");
+    if (N && n) {
+      N.set(n);
+    }
+
     this.renderables.get(node).render(shader);
   }
 
@@ -190,6 +201,12 @@ export class RasterVisitor implements Visitor {
       P.set(this.perspective);
     }
     shader.getUniformMatrix("V").set(this.lookat);
+    
+    const n =  this.lookat.invert().transpose();
+    const N = shader.getUniformMatrix("N");
+    if (N && n) {
+      N.set(n);
+    }
     this.renderables.get(node).render(shader);
   }
 }

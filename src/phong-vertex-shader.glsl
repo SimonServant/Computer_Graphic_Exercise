@@ -11,6 +11,7 @@ uniform mat4 N; // normal matrix
 
 varying vec3 v_normal;
 varying vec3 v_color;
+varying vec3 v_position;
 
 // Pass the vertex position in view space
 // to the fragment shader
@@ -21,10 +22,7 @@ void main() {
   
   // Pass the color and transformed vertex position through
   // TODO
-  vec3 some_normal_vector = normalize(v_normal);
-  mat3 test = mat3(N);
-  mat3 testest = normalize(test);
-
+  v_position = a_position;
   v_normal = (N * vec4(a_normal, 0)).xyz;
   v_color = a_color;
 }
