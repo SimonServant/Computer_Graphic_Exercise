@@ -12,6 +12,7 @@ uniform mat4 N; // normal matrix
 varying vec3 v_normal;
 varying vec3 v_color;
 varying vec3 v_position;
+varying vec3 normalInterp;
 
 // Pass the vertex position in view space
 // to the fragment shader
@@ -27,4 +28,10 @@ void main() {
   // a 4 diemsnional vector ? 
   v_normal = (N * vec4(a_normal, 0)).xyz;
   v_color = a_color;
+
+
+  vec4 vertPos4 = M * vec4(a_position, 1.0);
+  v_position = vec3(vertPos4) / vec3(vertPos4);
+  normalInterp = vec3(N * vec4(a_normal, 0.0));
+  gl_Position = V * vertPos4;
 }
