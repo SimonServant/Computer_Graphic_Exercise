@@ -25,5 +25,9 @@ void main(void) {
   const float Kd = 0.6;
   const float Ks = 0.4; 
   const float Ke = 4.0;
+
+  // v_position and v normal should be the intersection and the nromal 
+
+  // what is camera position ? missing for phong lightning calculation
 }
 

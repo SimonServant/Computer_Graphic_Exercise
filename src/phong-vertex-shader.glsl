@@ -23,6 +23,8 @@ void main() {
   // Pass the color and transformed vertex position through
   // TODO
   v_position = a_position;
+  // Do we have to transform position somewhat with v and m ? Therefore change it to a_position into
+  // a 4 diemsnional vector ? 
   v_normal = (N * vec4(a_normal, 0)).xyz;
   v_color = a_color;
 }
