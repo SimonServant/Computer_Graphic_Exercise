@@ -18,9 +18,8 @@ export default class RasterSphere {
      */
     normalBuffer: WebGLBuffer;
 
-    // TODO private variable for color buffer [exercise 9]
+    // TODO private variable for color buffer
     colorBuffer: WebGLBuffer;
-
     /**
      * The amount of indices
      */
@@ -43,6 +42,7 @@ export default class RasterSphere {
         let vertices = [];
         let indices = [];
         let normals = [];
+
         let colors = [];
 
         let ringsize = 30;
@@ -68,7 +68,12 @@ export default class RasterSphere {
                 vertices.push(y);
                 vertices.push(z);
 
-                let normal = (new Vector(x, y, z, 1)).sub(center).normalised();
+                // set random color of the current vertex
+                colors.push(0.8);
+                colors.push(0.4);
+                colors.push(0);
+
+                let normal = (new Vector(x, y, z, 1)).sub(center).normalize();
                 normals.push(normal.x);
                 normals.push(normal.y);
                 normals.push(normal.z);
@@ -87,12 +92,6 @@ export default class RasterSphere {
             }
         }
 
-        do {
-            colors.push(color.r);
-            colors.push(color.g);
-            colors.push(color.b);
-        } while (colors.length!= vertices.length)
-
         const vertexBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
@@ -107,15 +106,10 @@ export default class RasterSphere {
         this.normalBuffer = normalBuffer;
         this.elements = indices.length;
 
-        // TODO create colorBuffer [exercise 9]
-        // Anlegen des Buffer 
-        const colorBuffer = this.gl.createBuffer();
-        // Spezifikation des Buffertyps als Vertex / Index Buffer
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
-        // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-        // Initialiserung des Buffers mit Daten (Vertex Positionen)
-        //TODO FIll colorbuffer to fit vertexbuffer
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+        // TODO create colorBuffer
+        const colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         this.colorBuffer = colorBuffer;
     }
 
@@ -128,31 +122,28 @@ export default class RasterSphere {
         const positionLocation = shader.getAttributeLocation("a_position");
         this.gl.enableVertexAttribArray(positionLocation);
         this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
-        
 
-        // TODO bind colour buffer [exercise 9]
+        // TODO bind colour buffer
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        var colorLocation = shader.getAttributeLocation("a_color");
+        const colorLocation = shader.getAttributeLocation("color");
         this.gl.enableVertexAttribArray(colorLocation);
-        this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
-        
+        this.gl.vertexAttribPointer(colorLocation,
+            3, this.gl.FLOAT, false, 0, 0);
 
-        // TODO bind normal buffer [exercise 10]
+        // TODO bind normal buffer
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer);
-        var normalLocation = shader.getAttributeLocation("a_normal");
+        const normalLocation = shader.getAttributeLocation("a_normal");
         this.gl.enableVertexAttribArray(normalLocation);
-        this.gl.vertexAttribPointer(normalLocation, 3, this.gl.FLOAT, false, 0, 0);
-
-
-
+        this.gl.vertexAttribPointer(normalLocation, 
+            3, this.gl.FLOAT, false, 0, 0);
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.elements, this.gl.UNSIGNED_SHORT, 0);
 
         this.gl.disableVertexAttribArray(positionLocation);
-        // TODO disable color vertex attrib array [exercise 9]
+        // TODO disable color vertex attrib array
         this.gl.disableVertexAttribArray(colorLocation);
-        // TODO disable normal vertex attrib array [exercise 10]
+        // TODO disable normal vertex attrib array
         this.gl.disableVertexAttribArray(normalLocation);
     }
 }

@@ -7,58 +7,76 @@
  * @param  {number} width          - The width of the canvas
  * @param  {number} height         - The height of the canvas
  */
-export function bresenham(data: Uint8ClampedArray, pointA: [number, number], pointB: [number, number], width: number, height: number) {
-    const realWidth = width * 4;
-    var p1x = pointA[0];
-    var p1y = pointA[1];
-    var p2x = pointB[0];
-    var p2y = pointB[1];
+ export function bresenham(data: Uint8ClampedArray, pointA: [number, number], pointB: [number, number], width: number, height: number) {
+    // !snip
+    let xstart = pointA[0];
+    let ystart = pointA[1];
+    let xend = pointB[0];
+    let yend = pointB[1];
 
-    // Calculate line deltas
-    var dx = Math.abs(p2x - p1x);
-    var dy = Math.abs(p2y - p1y);
-    
-    var sx = p1x < p2x ? 1 : -1;
-    var sy = p1y < p2y ? 1 : -1; 
+    // Solution from https://de.wikipedia.org/wiki/Bresenham-Algorithmus
 
-    var err = (dx > dy ? dx : -dy) / 2;
-    var error_previous;
+    let tau, pdx, pdy, ddx, ddy, es, el;
 
-    var counter = 300;
+    /* Entfernung in beiden Dimensionen berechnen */
+    let dx = xend - xstart;
+    let dy = yend - ystart;
 
-    for(;;){
-        setPixel(p1x, p1y, data, realWidth);
-        if(p1x == p2x && p1y == p2y) {
-            break;
-        }
-        error_previous = err;
-        if(error_previous > -dx){
-            err -= dy;
-            p1x += sx;
-        }
-        if(error_previous < dy) {
-            err += dx;
-            p1y += sy;
-        }
-        counter --;
-        if (counter === 0){
-            var hansimGlück = 0;
-            //break;
-        }
+    /* Vorzeichen des Inkrements bestimmen */
+    let incx = Math.sign(dx);
+    let incy = Math.sign(dy);
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+
+    /* feststellen, welche Entfernung größer ist */
+    if (dx > dy) {
+        /* x ist schnelle Richtung */
+        pdx = incx;
+        pdy = 0; /* pd. ist Parallelschritt */
+        ddx = incx;
+        ddy = incy; /* dd. ist Diagonalschritt */
+        es = dy;
+        el = dx; /* Fehlerschritte schnell, langsam */
+    } else {
+        /* y ist schnelle Richtung */
+        pdx = 0;
+        pdy = incy; /* pd. ist Parallelschritt */
+        ddx = incx;
+        ddy = incy; /* dd. ist Diagonalschritt */
+        es = dx;
+        el = dy; /* Fehlerschritte schnell, langsam */
     }
 
-    var test = 1;
+    /* Initialisierungen vor Schleifenbeginn */
+    let x = xstart;
+    let y = ystart;
+    let err = el / 2;
 
-}
+    data[4 * (width * y + x) + 0] = 0;
+    data[4 * (width * y + x) + 1] = 0;
+    data[4 * (width * y + x) + 2] = 0;
+    data[4 * (width * y + x) + 3] = 255;
 
-
-function setPixel(
-    x: number,
-    y: number,
-    data: Uint8ClampedArray,
-    realWidth: number) {
-    data[x * 4 + y * realWidth] = 0;
-    data[x * 4 + y * realWidth + 1] = 0;
-    data[x * 4 + y * realWidth + 2] = 0;
-    data[x * 4 + y * realWidth + 3] = 255;
+    /* Pixel berechnen */
+    for (tau = 0; tau < el; ++tau) {
+        /* tau zaehlt die Pixel, el ist auch Anzahl */
+        /* Aktualisierung Fehlerterm */
+        err -= es;
+        if (err < 0) {
+            /* Fehlerterm wieder positiv (>=0) machen */
+            err += el;
+            /* Schritt in langsame Richtung, Diagonalschritt */
+            x += ddx;
+            y += ddy;
+        } else {
+            /* Schritt in schnelle Richtung, Parallelschritt */
+            x += pdx;
+            y += pdy;
+        }
+        data[4 * (width * y + x) + 0] = 0;
+        data[4 * (width * y + x) + 1] = 0;
+        data[4 * (width * y + x) + 2] = 0;
+        data[4 * (width * y + x) + 3] = 255;
+    }
+    // !snip
 }

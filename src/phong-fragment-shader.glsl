@@ -1,55 +1,65 @@
 precision mediump float;
+
 // Receive color and position values
 // TODO
 
 varying vec3 v_normal;
-varying vec3 v_color;
-varying vec3 v_position;
+varying vec3 colorVar;
+varying vec3 positionVar;
 
-//
-varying vec3 normalInterp;  // Surface normal
-//
-
-const vec3 lightPos = vec3(0.2, - 1.0, 1.0);
+const vec3 lightPos = vec3(1.0, 1.0, 1.0);
 const float shininess = 16.0;
-
-vec4 phong( vec3 color){
-  return vec4(color,1.0);
-}
+const float kA = 0.3;
+const float kD = 0.6;
+const float kS = 0.7;
 
 void main(void) {
-  vec4 phong_color = phong(v_color);
-  gl_FragColor = vec4(phong_color);
+  gl_FragColor = vec4(0.0, 0.0, 0.5, 1.0);
+  vec3 cameraPosition = vec3(0, 0, 0);
+
+
   // Phong lighting calculation
 
-  // What is camera position
+  // normal vector of intersection
+  // v_normal
 
-  const float Ka = 0.5;
-  const float Kd = 0.6;
-  const float Ks = 0.4; 
-  const float Ke = 4.0;
+  // point of intersection
+  // positionVar
+  vec3 lightVector = normalize(lightPos - positionVar);
 
-  // v_position and v normal should be the intersection and the nromal 
-  vec3 ambientColor= vec3(0.2, - 1.0, 1.0);
-  vec3 diffuseColor= vec3(0.2, - 1.0, 1.0);
-  vec3 specularColor= vec3(0.2, - 1.0, 1.0);
-  vec3 N = normalize(normalInterp);
-  vec3 L = normalize(lightPos - v_position);
-    // Lambert's cosine law
-  float lambertian = max(dot(N, L), 0.0);
-  float specular = 0.0;
-  if(lambertian > 0.0) {
-    vec3 R = reflect(-L, N);      // Reflected light vector
-    vec3 V = normalize(-v_position); // Vector to viewer
-    // Compute the specular term
-    float specAngle = max(dot(R, V), 0.0);
-    specular = pow(specAngle, shininess);
-  }
-  gl_FragColor = vec4(Ka * ambientColor +
-                      Kd * lambertian * diffuseColor +
-                      Ks * specular * specularColor, 1.0);
+  // vector from camera to intersection
+  vec3 cameraVector = normalize(positionVar - cameraPosition); 
+  
+  // ambiente lighting
+  float ambienteIntensity = 1.0;
+  vec3 ambiente = colorVar * ambienteIntensity * kA;
+  
 
-  //
-  // what is camera position ? missing for phong lightning calculation
+  // diffuse lighting
+  vec3 diffuse = vec3(0, 0, 0);
+  float diffuseIntensity = 1.0;
+  float dotProduct = dot(v_normal, lightVector);
+
+  // if the dot product is bigger than 0 ... only then compute the actual value of "diffuse" 
+  // ... because else the value is always 0
+
+  diffuse = colorVar * diffuseIntensity * kD * max(0.0, dotProduct);
+
+
+  // specular reflection
+  vec3 specular = vec3(0, 0, 0);
+  // vector from the intersection to the viewers eye
+
+  vec3 r = normalize(lightVector - v_normal * 2.0 * dot(lightVector, v_normal));
+
+  specular = colorVar * kS * pow(max(0.0, dot(r, cameraVector)), shininess);
+
+  // compute the phong-color value
+  vec3 phong = ambiente + diffuse + specular;
+
+  // set the color value
+  gl_FragColor.x = phong.x;
+  gl_FragColor.y = phong.y;
+  gl_FragColor.z = phong.z;
+  
 }
-

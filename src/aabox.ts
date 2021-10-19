@@ -1,3 +1,7 @@
+/**
+ * Author: Fabian Sieper
+ */
+
 import Vector from './vector';
 import Ray from './ray';
 import Intersection from './intersection';
@@ -57,8 +61,8 @@ export default class AABox {
    * @return The intersection if there is one, null if there is none
    */
   intersect(ray: Ray): Intersection | null {
-    // TODO [exercise 8 optional]
-    return null;
+    // TODO
+    return null
   }
 
 }

@@ -16,7 +16,6 @@ window.addEventListener('load', evt => {
     );
 
     const camera = {
-        origin: new Vector(0, 0, 0, 1),
         width: canvas.width,
         height: canvas.height,
         alpha: Math.PI * 2 / 3

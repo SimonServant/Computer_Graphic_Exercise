@@ -33,6 +33,17 @@ export default class Matrix {
     return this.data[col * 4 + row];
   }
 
+  getRow(row: number): Array<number>{
+
+    return [this.getVal(row, 0), this.getVal(row, 1), this.getVal(row, 2), this.getVal(row, 3) ]
+  }
+
+  getCol(col: number): Array<number>{
+
+    return [this.getVal(0, col), this.getVal(1, col), this.getVal(2, col), this.getVal(3, col) ]
+  }
+
+
   /**
    * Sets the value of the matrix at position row, col
    * @param row The value's row
@@ -43,19 +54,30 @@ export default class Matrix {
     this.data[col * 4 + row] = val;
   }
 
+  mulNumber(factor: number) {
+    
+    for (let i = 0; i < this.data.length; i++){
+      this.data[i] = this.data[i] * factor;
+    }
+  }
+
+  add(matrix: Matrix){
+    for (let i = 0; i < this.data.length; i++){
+      this.data[i] = this.data[i] + matrix.data[i];
+    }
+  }
+  
   /**
    * Returns a matrix that represents a translation
    * @param translation The translation vector that shall be expressed by the matrix
    * @return The resulting translation matrix
    */
   static translation(translation: Vector): Matrix {
-    // TODO exercise 7
-    return new Matrix([
-      1, 0, 0, translation.x,
-      0, 1, 0, translation.y,
-      0, 0, 1, translation.z,
-      0, 0, 0, 1
-    ]);
+
+    return new Matrix([ 1, 0, 0, translation.x, 
+                        0, 1, 0, translation.y, 
+                        0, 0, 1, translation.z, 
+                        0, 0, 0, 1]);
   }
 
   /**
@@ -65,33 +87,36 @@ export default class Matrix {
    * @return The resulting rotation matrix
    */
   static rotation(axis: Vector, angle: number): Matrix {
-    // TODO exercise 7
-    var refactorMatrix = Matrix.identity();
 
-    if (axis.x == 1){
+    // contains all rotation matrices
+    var rotationMatrizes = [[1, 0, 0, 0,
+                            0, Math.cos(angle), -1 * Math.sin(angle), 0,
+                            0, Math.sin(angle), Math.cos(angle), 0,
+                            0, 0, 0, 1],
 
-      refactorMatrix.setVal(1, 1, Math.cos(angle));
-      refactorMatrix.setVal(1, 2, -Math.sin(angle));
-      refactorMatrix.setVal(2, 1, Math.sin(angle));
-      refactorMatrix.setVal(2, 2, Math.cos(angle));
+                            [Math.cos(angle), 0, Math.sin(angle), 0,
+                            0, 1, 0, 0,
+                            -1 * Math.sin(angle), 0, Math.cos(angle), 0,
+                            0, 0, 0, 1],
 
-    } else if (axis.y == 1){
+                            [Math.cos(angle), -1 * Math.sin(angle), 0, 0,
+                            Math.sin(angle), Math.cos(angle), 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1]];
 
-      refactorMatrix.setVal(0, 0, Math.cos(angle));
-      refactorMatrix.setVal(0, 2, Math.sin(angle));
-      refactorMatrix.setVal(2, 0, -Math.sin(angle));
-      refactorMatrix.setVal(2, 2, Math.cos(angle));
+    // iterate over all entries of the axis vector - if one of the indecies is 1, return the 
+    // corresponding entry in "rotationMatrizes"
+    for (let i = 0; i < rotationMatrizes.length; i++){
+      if (i < axis.getAllData().length && axis.getData(i) == 1){
 
-    } else if (axis.z == 1){
+        return new Matrix(rotationMatrizes[i])
 
-      refactorMatrix.setVal(0, 0, Math.cos(angle));
-      refactorMatrix.setVal(0, 1, -Math.sin(angle));
-      refactorMatrix.setVal(1, 0, Math.sin(angle));
-      refactorMatrix.setVal(1, 1, Math.cos(angle));
-
-    } 
-    return refactorMatrix;
+      }
     }
+
+    // if there is no index set, return a normal identity matrix
+    return Matrix.identity();
+  }
 
   /**
    * Returns a matrix that represents a scaling
@@ -99,13 +124,11 @@ export default class Matrix {
    * @return The resulting scaling matrix
    */
   static scaling(scale: Vector): Matrix {
-    // TODO exercise 7
-    return new Matrix([
-      scale.x, 0, 0, 0,
-      0, scale.y, 0, 0,
-      0, 0, scale.z, 0,
-      0, 0, 0, 1
-    ]);
+
+    return new Matrix([scale.x, 0, 0, 0, 
+                      0, scale.y, 0, 0,
+                      0, 0, scale.z, 0,
+                      0, 0, 0, 1])
   }
 
   /**
@@ -116,18 +139,25 @@ export default class Matrix {
    * @return The resulting lookat matrix
    */
   static lookat(eye: Vector, center: Vector, up: Vector): Matrix {
-    // TODO exercise 10
-    let f = new Vector(center.x- eye.x, center.y - eye.y, center.z -eye.z, 0).normalised();
-    let Up = up.normalised();
-    let s = f.cross(Up);
-    let u  = s.normalised().cross(f);
 
-    return new Matrix([
-      s.x, s.y, s.z, 0,
-      u.x, u.y, u.z, 0,
-      -f.x, -f.y, -f.z, 0,
-      0, 0, 0, 1
-    ]);
+    // the camera has to look at "center"
+    // the camera is at position "eye"
+
+
+    var f  = center.sub(eye).normalize();
+    var s = f.cross(up).normalize();
+    var u = s.cross(f).normalize();
+
+    var lookat = new Matrix([ s.x,  s.y,   s.z,  0,
+                              u.x,  u.y,   u.z,  0,
+                              -f.x, -f.y, -f.z, 0,
+                              0,    0,    0,    1]).mul(
+                                                  new Matrix([1, 0, 0, -eye.x,
+                                                              0, 1, 0, -eye.y,
+                                                              0, 0, 1, -eye.z,
+                                                              0, 0, 0, 1]));
+                                              
+    return lookat;
   }
 
   /**
@@ -141,8 +171,20 @@ export default class Matrix {
    * @return The rotation matrix
    */
   static frustum(left: number, right: number, bottom: number, top: number, near: number, far: number): Matrix {
-    // TODO exercise 11
-    return Matrix.identity();
+
+
+    // these two transformations are contained in the following matrix
+
+    var A = (right + left) / (right - left);
+    var B = (top + bottom) / (top - bottom);
+    var C = - (far + near) / (far - near);
+    var D = -2 * far * near / (far - near);
+
+    return new Matrix([2 * near / (right - left), 0,                          A,  0,
+                      0,                          2 * near / (top - bottom),  B,  0,
+                      0,                          0,                          C,  D, 
+                      0,                          0,                          -1, 0]);
+
   }
 
   /**
@@ -154,8 +196,14 @@ export default class Matrix {
    * @return The resulting matrix
    */
   static perspective(fovy: number, aspect: number, near: number, far: number): Matrix {
-    // TODO exercise 11
-    return Matrix.identity();
+
+
+    var top = near * Math.tan(fovy / 360 * Math.PI);
+    var bottom = - top;
+    var right = top * aspect; 
+    var left = - right;
+
+    return this.frustum(left, right, bottom, top, near, far);
   }
 
   /**
@@ -170,45 +218,71 @@ export default class Matrix {
       0, 0, 0, 1
     ]);
   }
+  
+  /**
+   * Multiplies each of the elements with each other (elementar) and sums them up
+   * @param col A column of matrix or a vector
+   * @param row A row of a matrix or a vector
+   * @returns a number
+   */
+  rowTimesCol(col: Array<number>, row: Array<number>): number{
+
+    if (col.length != row.length){
+      return null
+    }
+
+    var sum = 0
+    for (let i = 0; i < col.length; i++){
+      sum += col[i] * row[i]
+    }
+
+    return sum
+  }
 
   /**
    * Matrix multiplication
-   * @param other The matrix or vector to multiplicate with
+   * @param other The matrix to multiplicate with
    * @return The result of the multiplication this*other
    */
-  mul(other: Matrix): Matrix;
-  mul(other: Vector): Vector;
-  mul(other: Matrix | Vector): Matrix | Vector {
-    if (other instanceof Matrix) {
-      // TODO exercise 7
-      console.log("Matrix-Matrix multiplication");
-      let resultMatrix = Matrix.identity();
+  mul(other: Matrix): Matrix {
 
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 4; col++) {
-          var result = 0;
-          for (let num = 0; num < 4; num++){
-            result += this.getVal(row, num) * other.getVal(num, col);
-          }
-          resultMatrix.setVal(row, col, result);
-        }
+    // dummy matrix whichs values have to be calculated
+    var solution = new Matrix([0, 0, 0, 0,
+                              0, 0, 0, 0,
+                              0, 0, 0, 0,
+                              0, 0, 0, 0]);
+
+    // for each row of the first matrix (this) and each col of the second matrix (other)
+    for (let row = 0; row < 4; row++){
+      for (let col = 0; col < 4; col++){
+        
+        // compute the corresponding values
+        solution.setVal(row, col, this.rowTimesCol(this.getRow(row), other.getCol(col)))
+
       }
-      return resultMatrix;
-    } else { // other is vector
-      // TODO exercise 7
-      console.log("Matrix-Vector multiplication");
-
-      var resultVec = new Vector(0, 0, 0, 0);
-
-      for (let row = 0; row < 4; row++) {
-        var result = 0;
-        for (let num = 0; num < 4; num++){
-          result += this.getVal(row, num) * other.data[num];
-        }
-        resultVec.data[row] = result;  
-      }
-      return resultVec;
     }
+
+    return solution
+  }
+
+  /**
+   * Matrix-vector multiplication
+   * @param other The vector to multiplicate with
+   * @return The result of the multiplication this*other
+   */
+  mulVec(other: Vector): Vector {
+
+    // dummy matrix whichs values have to be calculated
+    var solution = new Vector(0, 0, 0, 0);
+
+    // for each row of the  matrix (this) and the vector
+    for (let row = 0; row < 4; row++){
+
+      // multilpy row times vector
+      solution.setValue(row, this.rowTimesCol(this.getRow(row), other.getAllData()))
+    }
+
+    return solution
   }
 
   /**
@@ -216,15 +290,19 @@ export default class Matrix {
    * @return A new matrix that is the transposed of this
    */
   transpose(): Matrix {
-    // TODO exercise 7
-    var resultMatrix = Matrix.identity();
+  // dummy matrix whichs values have to be calculated
+  var solution = Matrix.identity();
 
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        resultMatrix.setVal(row, col, this.getVal(col, row));
+    // for each row of the first matrix (this) and each col of the second matrix (other)
+    for (let row = 0; row < 4; row++){
+      for (let col = 0; col < 4; col++){
+
+        // set the value of the column to the value of the row and the other way around
+        solution.setVal(col, row, this.getVal(row, col))
       }
     }
-    return resultMatrix;
+    
+    return solution
   }
 
   /**
@@ -238,114 +316,5 @@ export default class Matrix {
         "\t" + this.getVal(row, 3)
       );
     }
-  }
-
-  /**
-   * Returns a new matrix that is the inverse of this matrix
-   * @return The inverse matrix
-   */
-  invert(): Matrix {
-    let mat = this.data;
-    let dst = new Float32Array(16); //ret.getValues();
-    let tmp = new Float32Array(12);
-
-    /* temparray for pairs */
-    let src = new Float32Array(16); //new float[16];
-
-    /* array of transpose source matrix */
-    let det;
-
-    /* determinant */
-    /*
-     * transpose matrix
-     */
-    for (let i = 0; i < 4; i++) {
-      src[i] = mat[i * 4];
-      src[i + 4] = mat[i * 4 + 1];
-      src[i + 8] = mat[i * 4 + 2];
-      src[i + 12] = mat[i * 4 + 3];
-    }
-
-    /* calculate pairs for first 8 elements (cofactors) */
-    tmp[0] = src[10] * src[15];
-    tmp[1] = src[11] * src[14];
-    tmp[2] = src[9] * src[15];
-    tmp[3] = src[11] * src[13];
-    tmp[4] = src[9] * src[14];
-    tmp[5] = src[10] * src[13];
-    tmp[6] = src[8] * src[15];
-    tmp[7] = src[11] * src[12];
-    tmp[8] = src[8] * src[14];
-    tmp[9] = src[10] * src[12];
-    tmp[10] = src[8] * src[13];
-    tmp[11] = src[9] * src[12];
-
-    /* calculate first 8 elements (cofactors) */
-    dst[0] = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7];
-    dst[0] -= tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7];
-    dst[1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7];
-    dst[1] -= tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7];
-    dst[2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7];
-    dst[2] -= tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7];
-    dst[3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6];
-    dst[3] -= tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6];
-    dst[4] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3];
-    dst[4] -= tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3];
-    dst[5] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3];
-    dst[5] -= tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3];
-    dst[6] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3];
-    dst[6] -= tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3];
-    dst[7] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2];
-    dst[7] -= tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2];
-
-    /* calculate pairs for second 8 elements (cofactors) */
-    tmp[0] = src[2] * src[7];
-    tmp[1] = src[3] * src[6];
-    tmp[2] = src[1] * src[7];
-    tmp[3] = src[3] * src[5];
-    tmp[4] = src[1] * src[6];
-    tmp[5] = src[2] * src[5];
-    tmp[6] = src[0] * src[7];
-    tmp[7] = src[3] * src[4];
-    tmp[8] = src[0] * src[6];
-    tmp[9] = src[2] * src[4];
-    tmp[10] = src[0] * src[5];
-    tmp[11] = src[1] * src[4];
-
-    /* calculate second 8 elements (cofactors) */
-    dst[8] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15];
-    dst[8] -= tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15];
-    dst[9] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15];
-    dst[9] -= tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15];
-    dst[10] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15];
-    dst[10] -= tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15];
-    dst[11] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14];
-    dst[11] -= tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14];
-    dst[12] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9];
-    dst[12] -= tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10];
-    dst[13] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10];
-    dst[13] -= tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8];
-    dst[14] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8];
-    dst[14] -= tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9];
-    dst[15] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
-    dst[15] -= tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8];
-
-    /* calculate determinant */
-    det = src[0] * dst[0] + src[1] * dst[1] + src[2] * dst[2] + src[3] * dst[3];
-
-    if (det == 0.0) {
-      throw new Error("singular matrix is not invertible");
-    }
-
-    /* calculate matrix inverse */
-    det = 1 / det;
-
-    for (let j = 0; j < 16; j++) {
-      dst[j] *= det;
-    }
-
-    let ret = Matrix.identity();
-    ret.data = dst;
-    return ret;
   }
 }

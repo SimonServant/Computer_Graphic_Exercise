@@ -1,3 +1,4 @@
+import { dir } from 'node:console';
 import Vector from './vector';
 
 /**
@@ -13,20 +14,25 @@ export default class Ray {
 
   /**
    * Creates a ray from the camera through the image plane.
-   * @param xpos The pixel's x-position in the canvas
-   * @param ypos The pixel's y-position in the canvas
+   * @param x The pixel's x-position in the canvas
+   * @param y The pixel's y-position in the canvas
    * @param camera The Camera
    * @return The resulting Ray
    */
-  static makeRay(xpos: number, ypos: number,
-    camera: { origin: Vector, width: number, height: number, alpha: number }
+  static makeRay(x: number, y: number,
+    camera: { width: number, height: number, alpha: number }
   ): Ray {
     
-    var x_d = xpos - (camera.width-1)/2;
-    var y_d = (camera.height-1)/2 - ypos;
-    var z_d = -(camera.width/2) / Math.tan(camera.alpha/2);
-    //var origin = new Vector(xpos,ypos, 0 , 0 );
-    var direction = new Vector(x_d, y_d, z_d, 0).normalised();
-    return new Ray(camera.origin, direction);
+    var x_dir = x - (camera.width - 1) / 2
+    var y_dir = (camera.height - 1) / 2 - y
+    var z_dir = - (camera.width / 2) / Math.tan(camera.alpha / 2)
+
+    var direction = new Vector(x_dir, y_dir, z_dir, 0);
+    direction.normalize()
+
+    var origin = new Vector(0, 0, 0, 1);
+
+    return new Ray(origin, direction);
+
   }
 }

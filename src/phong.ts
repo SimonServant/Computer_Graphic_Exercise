@@ -1,6 +1,7 @@
 import Vector from './vector';
 import Intersection from './intersection';
-
+import Sphere from './sphere';
+import { maxHeaderSize } from 'node:http';
 /**
  * Calculate the colour of an object at the intersection point according to the Phong Lighting model.
  * @param color The colour of the intersected object
@@ -11,45 +12,79 @@ import Intersection from './intersection';
  * @return The resulting colour
  */
 export default function phong(
-  color: Vector, intersection: Intersection,
-  lightPositions: Array<Vector>, shininess: number,
+  color: Vector, 
+  intersection: Intersection,
+  lightPositions: Array<Vector>, 
+  shininess: number,
   cameraPosition: Vector
 ): Vector {
-  const lightColor = new Vector(0.8, 0.8, 0.8, 0); // Light intensity seems to be 0.8 for every color in that. Color is the same => white light of 80 Percent intensity
-  // Can this be used to calculate light intensity ? Can we even derive intensity simply by RGB since intensity can be increased by energy spent therefore intensity is not purely rgb
+  const lightColor = new Vector(0.8, 0.8, 0.8, 0);
+  const kA = 0.8;
+  const kD = 0.5;
+  const kS = 0.5;
 
 
-  const kA = 0.8; // Materials ambient reflectivity coefficient
-  const kD = 0.5; // Materials diffuse reflectivity coefficient
-  const kS = 0.5; // Materials specular reflectivity coefficient
-  // Missing ke Materials specular shininess
-  const kE = shininess;
+  // normal vector of intersection
+  var normal = intersection.normal
 
-  // Berechnung von Vektorgrößen. Gegeben sind n und s. S ist gegeben durch angabe von Licht / Lightposition und P Schnittpunkt ist gegeben durch Intersection Point =>
+  // point of intersection
+  var interPoint = intersection.point
 
-  // TODO: n = ? Is n Normal Vector of intersection ? No normally not. N Should be vektor from center of Orb to Intersection Point but we got no center here therefore we might have to change stuff
+  // compute vector of the intersection to each of the light sources
+  var lightVectors: Vector[] = [];
+  
+  for (let i = 0; i < lightPositions.length; i++){
 
-  // s == (P=>S) = S - P
-  var s = lightPositions[0].sub(intersection.point).normalised();
-  // // r == s gespiegelt an n => r=d−2(d⋅n)n // r = 
-  // var r =  s.sub(intersection.normal.mul(s.dot(intersection.normal)).mul(2));
+    lightVectors.push(lightPositions[i].sub(interPoint).normalize())
 
-  var r = intersection.normal.mul(s.dot(intersection.normal)).mul(2).sub(s);
-  // Last vektor is V towards the eye therefore =>
-  var v = cameraPosition.sub(intersection.point).normalised();
+  }
 
-  // Ambient Lighting: Lr  =  ka L^a | Right now missing Lr Reflected ambient engery and La fictitious ambient light energy
-  var Lr = color.mul(kA);
 
-  // Diffuse Lighting: Ld(ps= Lj max(0, n.dot(s) => Missing Lj = Li(p,wi))
-  var Ld = lightColor.mul(Math.max(0,intersection.normal.dot(s))).mul(kD);
+  // vector from camera to intersection
+  var cameraVector = interPoint.sub(cameraPosition).normalize()
+  
+  // ambiente lighting
+  var ambienteIntensity = 1.0
+  var ambiente = color.mul(ambienteIntensity * kA);
 
-  // Specular Reflection: ks Sum over j Lj max(9, r_j.dot(v)^ke)
-  var Ls = lightColor.mul(Math.pow(Math.max(0,r.dot(v)), kE)).mul(kS);
 
-  // Tipps implementierung: Normalisierung aller vektoren, Lichtquelle nicht verwenden wenn hinter Surface => n dot s kleiner gleich 0 dann ist Lj auch null
 
-  color =  Lr.add(Ld).add(Ls);
-  color.a = 1;
-  return color;
+  // diffuse lighting
+  var diffuse = new Vector(0, 0, 0, 0);
+  var diffuseIntensity = 1.0
+  for (let i = 0; i < lightVectors.length; i++){
+
+    diffuse = diffuse.add(lightColor.mul(diffuseIntensity * kD * max(0, normal.dot(lightVectors[i]))));
+
+  }
+
+
+  // specular reflection
+  var specular = new Vector(0, 0, 0, 0);
+  // vector from the intersection to the viewers eye
+
+  for (let i = 0; i < lightVectors.length; i++){
+    
+    // compute the vector of the light mirrored at the normal vector
+    // r = light - 2 * (light * norm) * norm
+    var r = lightVectors[i].sub(normal.mul(2 * lightVectors[i].dot(normal)))
+
+    // add the specular lighting of the current light source to the sum of specular lightings
+    specular = specular.add(lightColor.mul(kS * Math.pow(max(0, r.dot(cameraVector)), shininess)));
+
+  }
+  // Compute the value of the phong model
+  var phong = ambiente.add(diffuse.add(specular))
+  
+  return phong
+}
+
+
+export function max(value1: number, value2: number){
+  //** Returns the bigger of both values */
+  if (value1 > value2){
+    return value1
+  }
+
+  return value2
 }

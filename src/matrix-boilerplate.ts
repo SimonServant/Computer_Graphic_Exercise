@@ -1,6 +1,5 @@
 import 'bootstrap';
 import 'bootstrap/scss/bootstrap.scss';
-import Intersection from './intersection';
 import Ray from './ray';
 import phong from './phong';
 import Sphere from './sphere';
@@ -12,10 +11,6 @@ window.addEventListener('load', () => {
     const ctx = canvas.getContext("2d");
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
-    const objects = [
-        new Sphere(new Vector(.5, -.2, -2, 1), 0.4, new Vector(.3, 0, 0, 1)),
-        new Sphere(new Vector(-.5, -.2, -1.5, 1), 0.4, new Vector(0, 0, .3, 1))
-    ];
     const lightPositions = [
         new Vector(1, 1, -1, 1)
     ];
@@ -40,34 +35,24 @@ window.addEventListener('load', () => {
 
     function animate() {
         data.fill(0);
-        let manipulatedObjects = [];
-        for (let obj of objects) {
-            manipulatedObjects.push(
-                new Sphere(
-                    rotation.mul(scale).mul(translation).mul(obj.center),
-                    obj.radius, obj.color
-                )
-            );
+        let matrix = Matrix.identity();
+        if (useRotationElement.checked) {
+            matrix = matrix.mul(rotation);
         }
+        if (useTranslationElement.checked) {
+            matrix = matrix.mul(translation);
+        }
+        if (useScaleElement.checked) {
+            matrix = matrix.mul(scale);
+        }
+        const sphere = new Sphere(matrix.mulVec(new Vector(0.1, 0, -1.5, 1)), 0.4, new Vector(.3, 0, 0, 1));
         for (let x = 0; x < canvas.width; x++) {
             for (let y = 0; y < canvas.height; y++) {
                 const ray = Ray.makeRay(x, y, camera);
-                let minIntersection = new Intersection(Infinity, null, null);
-                let minObj = null;
-                for (let shape of manipulatedObjects) {
-                    const intersection = shape.intersect(ray);
-                    if (intersection && intersection.closerThan(minIntersection)) {
-                        minIntersection = intersection;
-                        minObj = shape;
-                    }
-                }
-                if (minObj) {
-                    if (!minObj.color) {
-                        setPixel(x, y, new Vector(0, 0, 0, 1));
-                    } else {
-                        const color = phong(minObj.color, minIntersection, lightPositions, shininess, camera.origin);
-                        setPixel(x, y, color);
-                    }
+                const intersection = sphere.intersect(ray);
+                if (intersection) {
+                    const color = phong(sphere.color, intersection, lightPositions, shininess, camera.origin);
+                    setPixel(x, y, color);
 
                 }
             }
@@ -81,6 +66,7 @@ window.addEventListener('load', () => {
     useRotationElement.onchange = () => {
         let range = document.getElementById("rotation") as HTMLInputElement;
         if (useRotationElement.checked) {
+            range.value = "0";
             range.oninput = () => {
                 rotation = Matrix.rotation(new Vector(0, 0, 1, 0),
                     Number(range.value));
@@ -99,6 +85,7 @@ window.addEventListener('load', () => {
     useTranslationElement.onchange = () => {
         let range = document.getElementById("translation") as HTMLInputElement;
         if (useTranslationElement.checked) {
+            range.value = "0";
             range.oninput = () => {
                 translation = Matrix.translation(new Vector(Number(range.value), 0, 0, 0));
                 window.requestAnimationFrame(animate);
@@ -116,6 +103,7 @@ window.addEventListener('load', () => {
     useScaleElement.onchange = () => {
         let range = document.getElementById("scale") as HTMLInputElement;
         if (useScaleElement.checked) {
+            range.value = "1";
             range.oninput = () => {
                 scale = Matrix.scaling(new Vector(
                     Number(range.value),

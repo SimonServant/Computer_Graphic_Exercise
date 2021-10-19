@@ -4,10 +4,12 @@ import RasterTextureBox from './raster-texture-box';
 import Vector from './vector';
 import Matrix from './matrix';
 import Visitor from './visitor';
+import PreVisitor from './previsitor';
+
 import {
   Node, GroupNode,
   SphereNode, AABoxNode,
-  TextureBoxNode
+  TextureBoxNode, LightNode, CameraNode
 } from './nodes';
 import Shader from './shader';
 
@@ -30,9 +32,15 @@ interface Renderable {
  * to render a Scenegraph
  */
 export class RasterVisitor implements Visitor {
-  // TODO declare instance variables here
-  matrixStack: Array<Matrix>;
 
+  // TODO declare instance variables here
+
+  matrixStack: Matrix[];
+  matrixStackInverse: Matrix[];
+
+  // object which is initiated by the call of the constructor
+  preVisitor: PreVisitor;
+  
   /**
    * Creates a new RasterVisitor
    * @param gl The 3D context to render to
@@ -46,7 +54,10 @@ export class RasterVisitor implements Visitor {
     private renderables: WeakMap<Node, Renderable>
   ) {
     // TODO setup
-    this.matrixStack = [];
+    this.matrixStack = [Matrix.identity()];
+    this.matrixStackInverse = [Matrix.identity()];
+    this.preVisitor = new PreVisitor();
+
   }
 
   /**
@@ -60,6 +71,25 @@ export class RasterVisitor implements Visitor {
     camera: Camera | null,
     lightPositions: Array<Vector>
   ) {
+
+    // TODO: manipulate the camera and lightpositions by using an extra visitor
+    // get transformation of camera
+    this.preVisitor.initMatrixLists()
+    rootNode.accept(this.preVisitor);
+    var cameraInverse = this.preVisitor.getInverseCameraMatrix();
+    var lightMatrices = this.preVisitor.getLightTransformations();
+
+    // create a new variable for the light positions so they wont be manipulated for the future
+    // ... only manipulated for now
+    var newLightPositions = lightPositions;
+
+    // We assume that the positions of the lights found in the graph are in the same order as in the 
+    // list of light sources
+    // TODO: change positions by giving each light source a name? Or an id?
+    for (let i = 0; i < lightPositions.length; i++){
+      newLightPositions[i] = lightMatrices[i].mulVec(lightPositions[i]);
+    }
+
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
@@ -99,8 +129,7 @@ export class RasterVisitor implements Visitor {
       camera.fovy,
       camera.aspect,
       camera.near,
-      camera.far
-    );
+      camera.far);
   }
 
   /**
@@ -108,21 +137,21 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNode(node: GroupNode) {
-    // TODO
-    if(this.matrixStack.length==0){
-      this.matrixStack.push(node.matrix)
-    }
-    else{
-      var peek = this.matrixStack[this.matrixStack.length-1]
-      var currentTransformation  = peek.mul(node.matrix)
-      this.matrixStack.push(currentTransformation)
-    }
-    node.children.forEach(child => {
-      child.accept(this);
-    });
 
-    var test = this.matrixStack.pop();
+    this.matrixStack.push(this.matrixStack[this.matrixStack.length - 1].mul(node.transform.getMatrix()));
+    this.matrixStackInverse.push(node.transform.getInverseMatrix().mul(this.matrixStackInverse[this.matrixStackInverse.length - 1]));
 
+    // for each of the children of the node accept this visitor
+    for(let index = 0; index < node.children.length; index++){
+      // update the current index bevor each iteration, such that the later on recursive iterations can start from this index
+
+      node.children[index].accept(this)
+
+    }
+
+    // remove the last computed matrices after finishing this node
+    this.matrixStack.pop();
+    this.matrixStackInverse.pop();
   }
 
   /**
@@ -132,10 +161,23 @@ export class RasterVisitor implements Visitor {
   visitSphereNode(node: SphereNode) {
     const shader = this.shader;
     shader.use();
-    let mat = Matrix.identity();
-    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
-    // TODO [exercise 9] Calculate the model matrix for the sphere
-    shader.getUniformMatrix("M").set(mat);
+    let toWorld = Matrix.identity();
+    let fromWorld = Matrix.identity();
+    
+    //  Calculate the model matrix for the sphere
+    toWorld = this.matrixStack[this.matrixStack.length - 1];
+    fromWorld = this.matrixStackInverse[this.matrixStackInverse.length - 1];
+
+    //  computing the normal matrix
+    var N = fromWorld.transpose();
+    N.setVal(0, 3, 0);
+    N.setVal(1, 3, 0);
+    N.setVal(2, 3, 0);
+    N.setVal(3, 0, 0);
+    N.setVal(3, 1, 0);
+    N.setVal(3, 2, 0);
+      
+    shader.getUniformMatrix("M").set(toWorld);
 
     const V = shader.getUniformMatrix("V");
     if (V && this.lookat) {
@@ -145,12 +187,8 @@ export class RasterVisitor implements Visitor {
     if (P && this.perspective) {
       P.set(this.perspective);
     }
-    
-    const n =  this.lookat.invert().transpose();
-    const N = shader.getUniformMatrix("N");
-    if (N && n) {
-      N.set(n);
-    }
+    // TODO set the normal matrix
+    shader.getUniformMatrix("N").set(N);  
 
     this.renderables.get(node).render(shader);
   }
@@ -162,10 +200,13 @@ export class RasterVisitor implements Visitor {
   visitAABoxNode(node: AABoxNode) {
     this.shader.use();
     let shader = this.shader;
-    let mat = Matrix.identity();
-    // TODO  [exercise 9] Calculate the model matrix for the sphere
-    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
-    shader.getUniformMatrix("M").set(mat);
+    let toWorld = Matrix.identity();
+
+    // TODO Calculate the model matrix for the box
+    toWorld = this.matrixStack[this.matrixStack.length - 1];
+
+    shader.getUniformMatrix("M").set(toWorld);
+    
     let V = shader.getUniformMatrix("V");
     if (V && this.lookat) {
       V.set(this.lookat);
@@ -173,12 +214,6 @@ export class RasterVisitor implements Visitor {
     let P = shader.getUniformMatrix("P");
     if (P && this.perspective) {
       P.set(this.perspective);
-    }
-
-    const n =  this.lookat.invert().transpose();
-    const N = shader.getUniformMatrix("N");
-    if (N && n) {
-      N.set(n);
     }
 
     this.renderables.get(node).render(shader);
@@ -192,22 +227,31 @@ export class RasterVisitor implements Visitor {
     this.textureshader.use();
     let shader = this.textureshader;
 
-    let mat = Matrix.identity();
-    // TODO [exercise 9] calculate the model matrix for the box
-    mat = mat.mul(this.matrixStack[this.matrixStack.length-1])
-    shader.getUniformMatrix("M").set(mat);
+    // calculate the model matrix for the box
+    let toWorld = this.matrixStack[this.matrixStack.length - 1];
+
+    shader.getUniformMatrix("M").set(toWorld);
+
     let P = shader.getUniformMatrix("P");
+    
     if (P && this.perspective) {
       P.set(this.perspective);
     }
     shader.getUniformMatrix("V").set(this.lookat);
-    
-    const n =  this.lookat.invert().transpose();
-    const N = shader.getUniformMatrix("N");
-    if (N && n) {
-      N.set(n);
-    }
+
     this.renderables.get(node).render(shader);
+  }
+
+  visitCameraNode(node: CameraNode){
+
+    // left empty intentionally
+
+  }
+
+  visitLightNode(node: LightNode){
+
+    // left empty intentionally
+
   }
 }
 
@@ -299,5 +343,17 @@ export class RasterSetupVisitor {
         node.texture
       )
     );
+  }
+
+  visitCameraNode(node: CameraNode){
+
+    // left empty intentionally
+
+  }
+
+  visitLightNode(node: LightNode){
+
+    // left empty intentionally
+
   }
 }

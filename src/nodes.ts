@@ -1,6 +1,6 @@
 import Visitor from './visitor';
-import Matrix from './matrix';
 import Vector from './vector';
+import { Transformation } from './transformation';
 
 /**
  * Class representing a Node in a Scenegraph
@@ -20,22 +20,32 @@ export class Node {
  * @extends Node
  */
 export class GroupNode extends Node {
-  public children:Array<Node> = new Array<Node>();
+  // TODO declare instance variables
+
+  // storing all followling nodes
+  children: Node[];
+
   /**
    * Constructor
    * @param mat A matrix describing the node's transformation
    */
-  constructor(public matrix: Matrix) {
+  constructor(public transform: Transformation) {
     super();
-    this.matrix = matrix;
+    this.children = [];
+    // TODO
   }
 
+  
   /**
    * Accepts a visitor according to the visitor pattern
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    visitor.visitGroupNode(this);
+
+    // the node calls the corresponding function of the visitor
+    visitor.visitGroupNode(this)
+    
+
   }
 
   /**
@@ -43,7 +53,8 @@ export class GroupNode extends Node {
    * @param childNode The child node to add
    */
   add(childNode: Node) {
-    this.children.push(childNode);
+
+    this.children.push(childNode)
   }
 }
 
@@ -70,7 +81,9 @@ export class SphereNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    visitor.visitSphereNode(this);
+    
+    // the node calls the corresponding function of the visitor
+    visitor.visitSphereNode(this)
   }
 }
 
@@ -95,6 +108,8 @@ export class AABoxNode extends Node {
    * @param  {Visitor} visitor - The visitor
    */
   accept(visitor: Visitor) {
+    
+    // the node calls the corresponding function of the visitor
     visitor.visitAABoxNode(this);
   }
 }
@@ -119,6 +134,42 @@ export class TextureBoxNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
+    
+    // the node calls the corresponding function of the visitor
     visitor.visitTextureBoxNode(this);
+  }
+}
+
+export class CameraNode extends Node {
+
+
+  camera: { origin: Vector, width: number, height: number, alpha: number };
+
+  constructor(camera: { origin: Vector, width: number, height: number, alpha: number }){
+    super();
+    this.camera = camera;
+  }
+
+  accept(visitor: Visitor) {
+    
+    // the node calls the corresponding function of the visitor
+    visitor.visitCameraNode(this);
+  }
+}
+
+export class LightNode extends Node {
+
+
+  light: Vector;
+
+  constructor(light: Vector){
+    super();
+    this.light = light;
+  }
+
+  accept(visitor: Visitor) {
+    
+    // the node calls the corresponding function of the visitor
+    visitor.visitLightNode(this);
   }
 }

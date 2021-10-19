@@ -1,6 +1,8 @@
 import Vector from './vector';
 import Intersection from './intersection';
 import Ray from './ray';
+import { Dirent } from 'node:fs';
+import { dir } from 'node:console';
 
 /**
  * A class representing a sphere
@@ -24,29 +26,54 @@ export default class Sphere {
    * @return The intersection if there is one, null if there is none
    */
   intersect(ray: Ray): Intersection | null {
-    this.center;
-    // Von allen anderen Vektoren Center abziehen um Center zum Mittelpunkt zu machen und Forml anzeigen zu können
-    var new_ray_origin = ray.origin.sub(this.center);
-    var discriminant  = Math.pow(new_ray_origin.dot(ray.direction), 2) - new_ray_origin.dot(new_ray_origin) + this.radius* this.radius;
-    if(discriminant > 0 ){
-      var t1 = -new_ray_origin.dot(ray.direction) + Math.sqrt(discriminant);
-      var t2 = -new_ray_origin.dot(ray.direction) - Math.sqrt(discriminant);
-      // Check wich intersection is closer
-      var result  = t1 < t2 ?  t1 : t2 ;
-      var intersectionPoint = ray.origin.add(ray.direction.mul(result));
-      var normal = intersectionPoint.sub(this.center);
-      return new Intersection(result, intersectionPoint, normal.normalised());
+    
+    var direction = ray.direction
+    var shiftedOrigin = ray.origin.sub(this.center)
+    direction.normalize()
+
+    var discriminante = Math.pow(shiftedOrigin.dot(direction), 2) - shiftedOrigin.dot(shiftedOrigin) + Math.pow(this.radius, 2)
+
+    if (discriminante < 0){
+
+      return null
+
+    } else if (discriminante == 0){
+      // one intersection
+
+      var t = - ray.origin.dot(ray.direction)
+
+      var intersectPoint = shiftedOrigin.add(ray.direction.mul(t))
+      var normal = intersectPoint.sub(this.center).normalize()
+      var intersection = new Intersection(t, intersectPoint, normal)
+
+      return intersection
+
+    } else if (discriminante > 0){
+
+      // two intersections
+
+      var t_one = - shiftedOrigin.dot(ray.direction) + Math.sqrt(discriminante)
+      var t_two = - shiftedOrigin.dot(ray.direction) - Math.sqrt(discriminante)
+
+      var intersectionPoint = null
+      var t = 0
+
+      if (t_one < t_two) {
+        // take t_one
+        intersectPoint = ray.origin.add(ray.direction.mul(t_one))
+        t = t_one
+      } else {
+        // take t_two
+        intersectPoint = ray.origin.add(ray.direction.mul(t_two))
+        t = t_two
+      }
+
+      var normal = intersectPoint.sub(this.center).normalize()
+      var intersection = new Intersection(t, intersectPoint, normal)
+      
+      return intersection
     }
-    else if(discriminant === 0 ){
-      var t1 = -new_ray_origin.dot(ray.direction) + Math.sqrt(discriminant);
-      var result = t1;
-      var intersectionPoint = ray.origin.add(ray.direction.mul(result));
-      // The normal of the intersectionPoint is the Vektor from Center of the orb to the intersection Point C => IP == IP - C. Taking the ray normal does not make sense, since the ray is not used anymore
-      var normal  = intersectionPoint.sub(this.center); //(Oberflächennormale deutet rechtwinkelig von der Fläche weg)
-      return new Intersection(result, intersectionPoint, normal.normalised()); 
-    }
-    else{
-      return null;
-    }
+
+    return null
   }
 }

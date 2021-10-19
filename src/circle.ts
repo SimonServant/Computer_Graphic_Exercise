@@ -11,22 +11,30 @@
  * @param radius The radius of the circle
  */
 export function circle(data: Uint8ClampedArray, x: number, y: number, width: number, height: number, radius: number) {
-    // first define the radius you want: 10
-    // definiere Punkt in der Mitte: complete widt = 300 => 150:150
-    const centerX = 150;
-    const centerY = 150;
-    const realWidth = width *4; //1200
-    var distance_x = centerX - x;
-    var distance_y = centerY - y;
 
-    const diameter = 100;
+    
+    var r = computeIndex(x, y, width)
+    var g = r + 1
+    var b = r + 2
+    var a = r + 3
 
-    var distance_to_center = Math.sqrt( distance_x* distance_x + distance_y*distance_y );
+    var distance = Math.sqrt(Math.pow(width / 2 - x,2) + Math.pow(height / 2 -  y,2))
 
-    if(distance_to_center < diameter){
-        data[x * 4 + y * realWidth] = 0;
-        data[x * 4 + y * realWidth + 1]= 0;
-        data[x * 4 + y * realWidth + 2]= 0;
-        data[x * 4 + y * realWidth + 3]= 255;
+    if (distance < radius){
+        data[r] = 0
+        data[g] = 0
+        data[b] = 0
+        data[a] = 255
+    } else {
+        data[r] = 0
+        data[g] = 0
+        data[b] = 0
+        data[a] = 0
     }
 }
+
+export function computeIndex(x: number, y: number, width: number){
+
+    return x * 4 + 4 * width * y
+}
+

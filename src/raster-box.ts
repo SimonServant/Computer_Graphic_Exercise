@@ -13,9 +13,10 @@ export default class RasterBox {
      * The indices describing which vertices form a triangle
      */
     indexBuffer: WebGLBuffer;
-    // TODO private variable for color buffer [exercise 9]
-    colorBuffer: WebGLBuffer;
 
+    // TODO private variable for color buffer
+    colorBuffer: WebGLBuffer;
+    
     /**
      * The amount of indices
      */
@@ -66,18 +67,6 @@ export default class RasterBox {
             // bottom
             5, 4, 1, 1, 0, 5
         ];
-
-        let colors = [
-            // Fill with 8 Values for Every vertex
-            0.0, 0.0, 0.0,
-            1, 1, 1,
-            1, 1, 0,
-            0, 1, 1,
-            1, 1, 0,
-            1, 1, 1,
-            1, 0, 0,
-            0, 1, 1,
-        ]
         const vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -88,15 +77,21 @@ export default class RasterBox {
         this.indexBuffer = indexBuffer;
         this.elements = indices.length;
 
-        // TODO create and fill a buffer for colours [exercise 9]
-        // Anlegen des Buffer 
-        const colorBuffer = this.gl.createBuffer();
-        // Spezifikation des Buffertyps als Vertex / Index Buffer
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colorBuffer);
-        // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-        // Initialiserung des Buffers mit Daten (Vertex Positionen)
-        // Create color array yourself to fit vertices
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+        // TODO create and fill a buffer for colours
+        // get how many vertices there are
+        var amountVertices = vertices.length / 3;
+        // vor each vertex create a color and store it in an array
+        var colors = [];
+        for (let i = 0; i < amountVertices; i++){
+            colors.push(Math.random()); // r
+            colors.push(Math.random()); // g
+            colors.push(Math.random()); // b
+        }
+
+
+        const colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         this.colorBuffer = colorBuffer;
     }
 
@@ -111,18 +106,18 @@ export default class RasterBox {
         this.gl.vertexAttribPointer(positionLocation,
             3, this.gl.FLOAT, false, 0, 0);
 
-
+        // TODO bind colour buffer
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        var colorLocation = shader.getAttributeLocation("a_color");
+        const colorLocation = shader.getAttributeLocation("color");
         this.gl.enableVertexAttribArray(colorLocation);
-        this.gl.vertexAttribPointer(colorLocation, 3, this.gl.FLOAT, false, 0, 0);
-        // TODO bind colour buffer [exercise 9]
+        this.gl.vertexAttribPointer(colorLocation,
+            4, this.gl.FLOAT, false, 0, 0);
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.elements, this.gl.UNSIGNED_SHORT, 0);
 
         this.gl.disableVertexAttribArray(positionLocation);
-        // TODO disable color vertex attrib array [exercise 9]
+        // TODO disable color vertex attrib array
         this.gl.disableVertexAttribArray(colorLocation);
     }
 }

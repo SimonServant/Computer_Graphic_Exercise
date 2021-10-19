@@ -11,40 +11,31 @@ import {
     RasterSetupVisitor
 } from './rastervisitor';
 import Shader from './shader';
-import phongVertexShader from './phong-vertex-shader.glsl';
+import {
+    SlerpNode
+} from './animation-nodes';
+import phongVertexShader from './phong-vertex-perspective-shader.glsl';
 import phongFragmentShader from './phong-fragment-shader.glsl';
-import textureVertexShader from './texture-vertex-shader.glsl';
+import textureVertexShader from './texture-vertex-perspective-shader.glsl';
 import textureFragmentShader from './texture-fragment-shader.glsl';
-import { Rotation, Scaling, Translation } from './transformation';
+import { SQT } from './transformation';
+import Quaternion from './quaternion';
 
 window.addEventListener('load', () => {
     const canvas = document.getElementById("rasteriser") as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2");
 
     // construct scene graph
-    const sg = new GroupNode(new Scaling(new Vector(1.4, 1.4, 1.4, 1)));
-    const sg2 = new GroupNode(new Translation(new Vector(0, 0, 0.4, 0)));
-    sg.add(sg2);
-    // Rotation around no axis?
-    const gn0 = new GroupNode(new Rotation(new Vector(0, 0, 0, 0), 0));
-    const gn1 = new GroupNode(new Scaling(new Vector(.3, .3, .3, 0)));
-    gn0.add(gn1);
-    const gn2 = new GroupNode(new Translation(new Vector(1, 0, -1.9, 0)));
-    gn1.add(gn2);
-    const sphere = new SphereNode(new Vector(.8, .4, .1, 1));
-    gn2.add(sphere);
-    let gn3 = new GroupNode(new Translation(new Vector(.5, 0, 0, 0)));
-    gn0.add(gn3);
-    sg2.add(gn0);
+    const sg = new GroupNode(new SQT(new Vector(1, 1, 1, 0), { angle: 0.6, axis: new Vector(0, 1, 0, 0) }, new Vector(0, 0, 0, 0)));
     const cube = new TextureBoxNode('hci-logo.png');
-    gn3.add(cube);
+    sg.add(cube);
 
     // setup for rendering
     const setupVisitor = new RasterSetupVisitor(gl);
     setupVisitor.setup(sg);
 
     let camera = {
-        eye: new Vector(0, 0, 1, 1),
+        eye: new Vector(0, 0, 2, 1),
         center: new Vector(0, 0, 0, 1),
         up: new Vector(0, 1, 0, 0),
         fovy: 60,
@@ -63,14 +54,38 @@ window.addEventListener('load', () => {
     );
     const visitor = new RasterVisitor(gl, phongShader, textureShader, setupVisitor.objects);
 
-    function animate(timestamp: number) {
-        gn0.transform = new Rotation(new Vector(0, 0, 1, 0), timestamp / 1000);
-        gn3.transform = new Rotation(new Vector(0, 1, 0, 0), timestamp / 1000);
-        visitor.render(sg, camera, []);
-        window.requestAnimationFrame(animate);
+    let animationNodes = [
+        new SlerpNode(sg,
+            Quaternion.fromAxisAngle((new Vector(0, 1, 0, 0)).normalize(), 0.6),
+            Quaternion.fromAxisAngle((new Vector(0, 1, 1, 0)).normalize(), 0.6)
+        )
+    ];
+
+    function simulate(deltaT: number) {
+        for (let animationNode of animationNodes) {
+            animationNode.simulate(deltaT);
+        }
     }
 
-    phongShader.load();
-    textureShader.load();
-    window.requestAnimationFrame(animate);
+    let lastTimestamp = performance.now();
+
+    function animate(timestamp: number) {
+        simulate(timestamp - lastTimestamp);
+        visitor.render(sg, camera, []);
+        lastTimestamp = timestamp;
+        window.requestAnimationFrame(animate);
+    }
+    Promise.all(
+        [phongShader.load(), textureShader.load()]
+    ).then(x =>
+        window.requestAnimationFrame(animate)
+    );
+
+    window.addEventListener('keydown', function (event) {
+        switch (event.key) {
+            case "ArrowUp":
+                animationNodes[0].toggleActive();
+                break;
+        }
+    });
 });
