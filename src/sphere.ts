@@ -1,8 +1,8 @@
 import Vector from './vector';
 import Intersection from './intersection';
 import Ray from './ray';
-import { Dirent } from 'node:fs';
-import { dir } from 'node:console';
+//import { Dirent } from 'node:fs';
+//import { dir } from 'node:console';
 
 /**
  * A class representing a sphere

@@ -1,4 +1,4 @@
-import { dir } from 'node:console';
+//import { dir } from 'node:console';
 import Vector from './vector';
 
 /**

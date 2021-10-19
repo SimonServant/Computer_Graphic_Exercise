@@ -1,7 +1,7 @@
 import Vector from './vector';
 import Intersection from './intersection';
 import Sphere from './sphere';
-import { maxHeaderSize } from 'node:http';
+//import { maxHeaderSize } from 'node:http';
 /**
  * Calculate the colour of an object at the intersection point according to the Phong Lighting model.
  * @param color The colour of the intersected object
